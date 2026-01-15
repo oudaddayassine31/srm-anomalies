@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRM Oriental - Anomalies</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif}.header{background:linear-gradient(135deg,#1E40AF,#1E3A8A);color:#fff;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}.header h1{font-size:1.1rem}.header small{opacity:.9;font-size:.75rem}.count{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700}.main{display:flex;height:calc(100vh - 110px)}.footer{background:linear-gradient(135deg,#1E40AF,#1E3A8A);color:#fff;padding:.6rem 1.5rem;text-align:center;font-size:.75rem}.sidebar{width:300px;background:#F8FAFC;border-right:1px solid #E2E8F0;overflow-y:auto;padding:.5rem}.card{background:#fff;border:2px solid #E2E8F0;border-left:4px solid #DC2626;border-radius:8px;padding:.7rem;margin-bottom:.5rem;cursor:pointer}.card:hover{border-color:#3B82F6}.card.selected{background:#EFF6FF;border-color:#1E40AF}.fid{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700}.anomalie{font-size:.73rem;color:#DC2626;margin-top:.3rem}.rue{font-size:.7rem;color:#94A3B8;margin-top:.2rem}#map{flex:1;height:100%}.marker{background:#FEE2E2;border:2px solid #DC2626;border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#991B1B;box-shadow:0 1px 3px rgba(0,0,0,.3)}.leaflet-popup-content-wrapper{border-radius:8px}.leaflet-popup-content{margin:0;min-width:240px}.popup{padding:.8rem}.popup h3{font-family:'JetBrains Mono',monospace;font-size:1.2rem;border-bottom:2px solid #E2E8F0;padding-bottom:.5rem;margin-bottom:.6rem}.popup-info{background:#FEF2F2;padding:.5rem;border-radius:5px;font-size:.8rem;margin-bottom:.6rem}.popup-info div{margin-bottom:.25rem}.popup-info strong{color:#991B1B}.btn{display:block;background:#1E40AF;color:#fff;text-align:center;padding:.6rem;border-radius:5px;text-decoration:none;font-weight:600;font-size:.85rem}.btn:hover{background:#1E3A8A}.legend{position:absolute;bottom:20px;left:10px;background:#fff;padding:8px 12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:1000;font-size:.7rem}@media(max-width:700px){.main{flex-direction:column}.sidebar{width:100%;height:35%}}
+</style>
+</head>
+<body>
+<header class="header">
+<div><h1>💧 SRM Oriental - Anomalies</h1><small>Réseau AEP</small></div>
+<div style="text-align:right"><div class="count" id="count">-</div><small>anomalies</small></div>
+</header>
+<div class="main">
+<aside class="sidebar" id="list"></aside>
+<div id="map"></div>
+</div>
+<footer class="footer">© 2026 ETAFAT Consulting. Tous droits réservés.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const G='https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=publish-editor?usp=pp_url';
+const E='entry.57826848';
+const F='data.geojson';
+let m,k={},d=[];
+document.addEventListener('DOMContentLoaded',async()=>{m=L.map('map').setView([34.68,-2.0],10);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);const l=L.control({position:'bottomleft'});l.onAdd=()=>{const v=L.DomUtil.create('div','legend');v.innerHTML='<strong>Légende:</strong> <span class="marker" style="margin-left:5px">123</span> = FID';return v};l.addTo(m);try{const r=await fetch(F);const j=await r.json();d=j.features.filter(f=>f.properties.PRESENCE_ANOMALIE==='Oui');document.getElementById('count').textContent=d.length;rL();rM();fM()}catch(e){document.getElementById('list').innerHTML='<div style="padding:1rem;color:#DC2626"><strong>Erreur:</strong><br>Fichier "'+F+'" non trouvé.</div>'}});
+function rL(){const h=d.map(f=>{const p=f.properties;return'<div class="card" data-fid="'+p.fid+'"><div class="fid">#'+p.fid+'</div>'+(p.ANOMALIE_TAMPON?'<div class="anomalie">Tampon: '+p.ANOMALIE_TAMPON+'</div>':'')+(p.ANOMALIE_REGARD?'<div class="anomalie">Regard: '+p.ANOMALIE_REGARD+'</div>':'')+(p.REF_RUE?'<div class="rue">📍 '+p.REF_RUE+'</div>':'')+'</div>'}).join('');document.getElementById('list').innerHTML=h;document.querySelectorAll('.card').forEach(c=>{c.onclick=()=>sR(parseInt(c.dataset.fid))})}
+function rM(){d.forEach(f=>{const p=f.properties;const c=gC(f.geometry);if(!c)return;const i=L.divIcon({className:'marker',html:p.fid,iconSize:null});const x=L.marker([c.lat,c.lon],{icon:i}).addTo(m).on('click',()=>sR(p.fid));k[p.fid]=x})}
+function gC(g){if(g.type==='Point')return{lon:g.coordinates[0],lat:g.coordinates[1]};if(g.type==='Polygon'){const r=g.coordinates[0];const lon=r.reduce((s,p)=>s+p[0],0)/r.length;const lat=r.reduce((s,p)=>s+p[1],0)/r.length;return{lon,lat}}return null}
+function sR(fid){const f=d.find(x=>x.properties.fid===fid);if(!f)return;const p=f.properties;const c=gC(f.geometry);document.querySelectorAll('.card').forEach(x=>x.classList.remove('selected'));document.querySelector('.card[data-fid="'+fid+'"]')?.classList.add('selected');m.setView([c.lat,c.lon],16);const u=G+'&'+E+'='+fid;const pop='<div class="popup"><h3>Regard #'+fid+'</h3><div class="popup-info">'+(p.ANOMALIE_TAMPON?'<div><strong>Tampon:</strong> '+p.ANOMALIE_TAMPON+'</div>':'')+(p.ANOMALIE_REGARD?'<div><strong>Regard:</strong> '+p.ANOMALIE_REGARD+'</div>':'')+(p.DESCRIPTION_ANOMALIE?'<div><strong>Description:</strong> '+p.DESCRIPTION_ANOMALIE+'</div>':'')+(p.REF_RUE?'<div><strong>Rue:</strong> '+p.REF_RUE+'</div>':'')+'</div><a href="'+u+'" target="_blank" class="btn">📝 Signaler intervention</a></div>';k[fid].bindPopup(pop).openPopup()}
+function fM(){if(d.length===0)return;const b=d.map(f=>{const c=gC(f.geometry);return[c.lat,c.lon]});m.fitBounds(b,{padding:[30,30]})}
+</script>
+</body>
+</html>
