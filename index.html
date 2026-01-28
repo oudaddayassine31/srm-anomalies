@@ -311,6 +311,19 @@
                 gap: 10px;
             }
         }
+        /* Rendre le switch OSM/Satellite plus visible */
+.leaflet-control-layers {
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  font-size: 0.9rem;
+}
+
+.leaflet-control-layers label {
+  margin: 6px 0;
+  font-weight: 600;
+}
+
     </style>
 </head>
 
@@ -357,7 +370,16 @@
             map: {
                 initialCenter: [34.68, -2.0],
                 initialZoom: 10,
-                tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                tileLayers: {
+                    osm: {
+                        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        name: 'OpenStreetMap'
+                    },
+                    satellite: {
+                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                        name: 'Satellite'
+                    }
+                }
             }
         };
 
@@ -472,6 +494,7 @@
         };
 
         const MapManager = {
+
        
             init() {
                 state.map = L.map('map').setView(
@@ -479,9 +502,24 @@
                     CONFIG.map.initialZoom
                 );
 
-                L.tileLayer(CONFIG.map.tileLayer, {
+                // Couches de base
+                const osmLayer = L.tileLayer(CONFIG.map.tileLayers.osm.url, {
                     attribution: '© OpenStreetMap'
-                }).addTo(state.map);
+                });
+
+                const satelliteLayer = L.tileLayer(CONFIG.map.tileLayers.satellite.url, {
+                    attribution: '© Esri'
+                });
+
+                // Ajouter OSM par défaut
+                osmLayer.addTo(state.map);
+
+                // Contrôle pour switcher entre les couches
+                L.control.layers(
+                { 'OpenStreetMap': osmLayer, 'Satellite': satelliteLayer },
+                null,
+                { collapsed: false, position: 'topright' }
+                ).addTo(state.map);
 
                 this.addLegend();
             },
