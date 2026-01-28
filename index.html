@@ -1,37 +1,714 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SRM Oriental - Anomalies</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif}.header{background:linear-gradient(135deg,#1E40AF,#1E3A8A);color:#fff;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}.header h1{font-size:1.1rem}.header small{opacity:.9;font-size:.75rem}.count{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700}.main{display:flex;height:calc(100vh - 110px)}.footer{background:linear-gradient(135deg,#1E40AF,#1E3A8A);color:#fff;padding:.6rem 1.5rem;text-align:center;font-size:.75rem}.sidebar{width:300px;background:#F8FAFC;border-right:1px solid #E2E8F0;overflow-y:auto;padding:.5rem}.card{background:#fff;border:2px solid #E2E8F0;border-left:4px solid #DC2626;border-radius:8px;padding:.7rem;margin-bottom:.5rem;cursor:pointer}.card:hover{border-color:#3B82F6}.card.selected{background:#EFF6FF;border-color:#1E40AF}.fid{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700}.anomalie{font-size:.73rem;color:#DC2626;margin-top:.3rem}.rue{font-size:.7rem;color:#94A3B8;margin-top:.2rem}#map{flex:1;height:100%}.marker{background:#FEE2E2;border:2px solid #DC2626;border-radius:4px;padding:1px 5px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#991B1B;box-shadow:0 1px 3px rgba(0,0,0,.3)}.leaflet-popup-content-wrapper{border-radius:8px}.leaflet-popup-content{margin:0;min-width:240px}.popup{padding:.8rem}.popup h3{font-family:'JetBrains Mono',monospace;font-size:1.2rem;border-bottom:2px solid #E2E8F0;padding-bottom:.5rem;margin-bottom:.6rem}.popup-info{background:#FEF2F2;padding:.5rem;border-radius:5px;font-size:.8rem;margin-bottom:.6rem}.popup-info div{margin-bottom:.25rem}.popup-info strong{color:#991B1B}.btn{display:block;background:#1E40AF;color:#fff;text-align:center;padding:.6rem;border-radius:5px;text-decoration:none;font-weight:600;font-size:.85rem}.btn:hover{background:#1E3A8A}.legend{position:absolute;bottom:20px;left:10px;background:#fff;padding:8px 12px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:1000;font-size:.7rem}@media(max-width:700px){.main{flex-direction:column}.sidebar{width:100%;height:35%}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM Oriental - Gestion des Regards</title>
+    
+    <!-- Dépendances externes -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+
+        :root {
+            --color-primary: #1E40AF;
+            --color-primary-dark: #1E3A8A;
+            --color-danger: #DC2626;
+            --color-danger-light: #FEE2E2;
+            --color-danger-dark: #991B1B;
+            --color-success: #10B981;
+            --color-success-light: #ECFDF5;
+            --color-warning: #F59E0B;
+            --color-warning-dark: #D97706;
+            --color-gray-50: #F8FAFC;
+            --color-gray-200: #E2E8F0;
+            --color-gray-400: #94A3B8;
+            --font-sans: 'DM Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            color: #fff;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header__title {
+            font-size: 1.1rem;
+        }
+
+        .header__subtitle {
+            opacity: 0.9;
+            font-size: 0.75rem;
+        }
+
+        .header__actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header__count {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .btn {
+            display: block;
+            background: var(--color-primary);
+            color: #fff;
+            text-align: center;
+            padding: 0.6rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .btn--export {
+            background: var(--color-success);
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn--export:hover {
+            background: #059669;
+        }
+
+        .btn--copy {
+            background: var(--color-warning);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+        }
+
+        .btn--copy:hover {
+            background: var(--color-warning-dark);
+        }
+
+        .btn--copy.is-copied {
+            background: var(--color-success);
+        }
+
+        .btn--copy-large {
+            background: var(--color-warning);
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .btn--copy-large:hover {
+            background: var(--color-warning-dark);
+        }
+
+
+        .main {
+            display: flex;
+            height: calc(100vh - 110px);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            color: #fff;
+            padding: 0.6rem 1.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+
+
+        .sidebar {
+            width: 320px;
+            background: var(--color-gray-50);
+            border-right: 1px solid var(--color-gray-200);
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 2px solid var(--color-gray-200);
+            border-left: 4px solid var(--color-danger);
+            border-radius: 8px;
+            padding: 0.7rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.is-selected {
+            background: #EFF6FF;
+            border-color: var(--color-primary);
+        }
+
+        .card__fid {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .card__anomalie {
+            font-size: 0.73rem;
+            color: var(--color-danger);
+            margin-top: 0.3rem;
+            font-weight: 600;
+        }
+
+        .card__location {
+            font-size: 0.7rem;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .card__location a {
+            color: var(--color-success);
+            text-decoration: none;
+        }
+
+        .card__location a:hover {
+            text-decoration: underline;
+        }
+
+        /* =============================================
+           CSS - Carte Leaflet
+           ============================================= */
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+
+        .marker {
+            background: var(--color-danger-light);
+            border: 2px solid var(--color-danger);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-danger-dark);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 10px;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            font-size: 0.7rem;
+        }
+
+ 
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            min-width: 280px;
+        }
+
+        .popup {
+            padding: 0.8rem;
+        }
+
+        .popup__title {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--color-gray-200);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
+            color: var(--color-primary);
+        }
+
+        .popup__info {
+            background: #FEF2F2;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .popup__info div {
+            margin-bottom: 0.25rem;
+        }
+
+        .popup__info strong {
+            color: var(--color-danger-dark);
+        }
+
+        .popup__location {
+            background: var(--color-success-light);
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 0.6rem;
+        }
+
+        .popup__location a {
+            color: var(--color-success);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .popup__location a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 700px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 35%;
+            }
+
+            .header {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<header class="header">
-<div><h1>💧 SRM Oriental - Anomalies</h1><small>Réseau AEP</small></div>
-<div style="text-align:right"><div class="count" id="count">-</div><small>anomalies</small></div>
-</header>
-<div class="main">
-<aside class="sidebar" id="list"></aside>
-<div id="map"></div>
-</div>
-<footer class="footer">© 2026 ETAFAT. Tous droits réservés.</footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-const G='https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=publish-editor?usp=pp_url';
-const E='entry.57826848';
-const F='data.geojson';
-let m,k={},d=[];
-document.addEventListener('DOMContentLoaded',async()=>{m=L.map('map').setView([34.68,-2.0],10);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);const l=L.control({position:'bottomleft'});l.onAdd=()=>{const v=L.DomUtil.create('div','legend');v.innerHTML='<strong>Légende:</strong> <span class="marker" style="margin-left:5px">123</span> = FID';return v};l.addTo(m);try{const r=await fetch(F);const j=await r.json();d=j.features.filter(f=>f.properties.PRESENCE_ANOMALIE==='Oui');document.getElementById('count').textContent=d.length;rL();rM();fM()}catch(e){document.getElementById('list').innerHTML='<div style="padding:1rem;color:#DC2626"><strong>Erreur:</strong><br>Fichier "'+F+'" non trouvé.</div>'}});
-function rL(){const h=d.map(f=>{const p=f.properties;return'<div class="card" data-fid="'+p.fid+'"><div class="fid">#'+p.fid+'</div>'+(p.ANOMALIE_TAMPON?'<div class="anomalie">Tampon: '+p.ANOMALIE_TAMPON+'</div>':'')+(p.ANOMALIE_REGARD?'<div class="anomalie">Regard: '+p.ANOMALIE_REGARD+'</div>':'')+(p.REF_RUE?'<div class="rue">📍 '+p.REF_RUE+'</div>':'')+'</div>'}).join('');document.getElementById('list').innerHTML=h;document.querySelectorAll('.card').forEach(c=>{c.onclick=()=>sR(parseInt(c.dataset.fid))})}
-function rM(){d.forEach(f=>{const p=f.properties;const c=gC(f.geometry);if(!c)return;const i=L.divIcon({className:'marker',html:p.fid,iconSize:null});const x=L.marker([c.lat,c.lon],{icon:i}).addTo(m).on('click',()=>sR(p.fid));k[p.fid]=x})}
-function gC(g){if(g.type==='Point')return{lon:g.coordinates[0],lat:g.coordinates[1]};if(g.type==='Polygon'){const r=g.coordinates[0];const lon=r.reduce((s,p)=>s+p[0],0)/r.length;const lat=r.reduce((s,p)=>s+p[1],0)/r.length;return{lon,lat}}return null}
-function sR(fid){const f=d.find(x=>x.properties.fid===fid);if(!f)return;const p=f.properties;const c=gC(f.geometry);document.querySelectorAll('.card').forEach(x=>x.classList.remove('selected'));document.querySelector('.card[data-fid="'+fid+'"]')?.classList.add('selected');m.setView([c.lat,c.lon],16);const u=G+'&'+E+'='+fid;const pop='<div class="popup"><h3>Regard #'+fid+'</h3><div class="popup-info">'+(p.ANOMALIE_TAMPON?'<div><strong>Tampon:</strong> '+p.ANOMALIE_TAMPON+'</div>':'')+(p.ANOMALIE_REGARD?'<div><strong>Regard:</strong> '+p.ANOMALIE_REGARD+'</div>':'')+(p.DESCRIPTION_ANOMALIE?'<div><strong>Description:</strong> '+p.DESCRIPTION_ANOMALIE+'</div>':'')+(p.REF_RUE?'<div><strong>Rue:</strong> '+p.REF_RUE+'</div>':'')+'</div><a href="'+u+'" target="_blank" class="btn">📝 Signaler intervention</a></div>';k[fid].bindPopup(pop).openPopup()}
-function fM(){if(d.length===0)return;const b=d.map(f=>{const c=gC(f.geometry);return[c.lat,c.lon]});m.fitBounds(b,{padding:[30,30]})}
-</script>
+
+    <header class="header">
+        <div>
+            <h1 class="header__title">💧 SRM Oriental ANOMALIES</h1>
+            <small class="header__subtitle">Réseau AEP - Regards à traiter</small>
+        </div>
+        <div class="header__actions">
+            <button class="btn btn--export" id="btnExport">
+                📥 Exporter Excel
+            </button>
+            <div style="text-align: right;">
+                <div class="header__count" id="count">-</div>
+                <small>regards</small>
+            </div>
+        </div>
+    </header>
+
+
+    <main class="main">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div id="map"></div>
+    </main>
+
+    <footer class="footer">
+        © 2026 ETAFAT. Tous droits réservés.
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const CONFIG = {
+            dataFile: 'regard.geojson',
+            googleForm: {
+                url: 'https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=pp_url',
+                fidField: 'entry.57826848'
+            },
+            map: {
+                initialCenter: [34.68, -2.0],
+                initialZoom: 10,
+                tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            }
+        };
+
+
+        const state = {
+            map: null,
+            markers: {},
+            data: []
+        };
+
+
+        const Utils = {
+
+            getGoogleMapsLink(lat, lon) {
+                return `https://www.google.com/maps?q=${lat},${lon}`;
+            },
+
+
+            getCoordinates(geometry) {
+                if (!geometry) return null;
+
+                switch (geometry.type) {
+                    case 'Point':
+                        return {
+                            lat: geometry.coordinates[1],
+                            lon: geometry.coordinates[0]
+                        };
+
+                    case 'Polygon':
+                        const ring = geometry.coordinates[0];
+                        const centroid = ring.reduce(
+                            (acc, coord) => ({
+                                lon: acc.lon + coord[0],
+                                lat: acc.lat + coord[1]
+                            }),
+                            { lon: 0, lat: 0 }
+                        );
+                        return {
+                            lat: centroid.lat / ring.length,
+                            lon: centroid.lon / ring.length
+                        };
+
+                    default:
+                        return null;
+                }
+            },
+
+            filterByRetourTerrain(features) {
+                return features.filter(feature => {
+                    const value = feature.properties.RETOUR_TERRAIN;
+                    return value && value.toLowerCase() === 'oui';
+                });
+            },
+
+
+            getTodayDate() {
+                return new Date().toISOString().split('T')[0];
+            }
+        };
+
+
+        const Clipboard = {
+  
+            copyLink(lat, lon, button) {
+                const link = Utils.getGoogleMapsLink(lat, lon);
+                const originalText = button.textContent;
+
+                navigator.clipboard.writeText(link).then(() => {
+                    button.textContent = '✓ Copié!';
+                    button.classList.add('is-copied');
+
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('is-copied');
+                    }, 2000);
+                });
+            }
+        };
+
+        window.copyLink = Clipboard.copyLink;
+
+
+        const ExcelExporter = {
+ 
+            export() {
+                const excelData = state.data.map(feature => {
+                    const props = feature.properties;
+                    const coords = Utils.getCoordinates(feature.geometry);
+
+                    return {
+                        'fid_terrain': props.fid_terrain,
+                        'lien_google_maps': coords 
+                            ? Utils.getGoogleMapsLink(coords.lat, coords.lon) 
+                            : ''
+                    };
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(excelData);
+                const workbook = XLSX.utils.book_new();
+                
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Regards');
+
+            
+                worksheet['!cols'] = [
+                    { wch: 15 },  // fid_terrain
+                    { wch: 50 }   // lien_google_maps
+                ];
+
+                const filename = `regards_retour_terrain_${Utils.getTodayDate()}.xlsx`;
+                XLSX.writeFile(workbook, filename);
+            }
+        };
+
+        const MapManager = {
+       
+            init() {
+                state.map = L.map('map').setView(
+                    CONFIG.map.initialCenter,
+                    CONFIG.map.initialZoom
+                );
+
+                L.tileLayer(CONFIG.map.tileLayer, {
+                    attribution: '© OpenStreetMap'
+                }).addTo(state.map);
+
+                this.addLegend();
+            },
+
+       
+            addLegend() {
+                const legend = L.control({ position: 'bottomleft' });
+
+                legend.onAdd = () => {
+                    const div = L.DomUtil.create('div', 'legend');
+                    div.innerHTML = `
+                        <strong>Légende:</strong> 
+                        <span class="marker" style="margin-left:5px">123</span> = FID Terrain
+                    `;
+                    return div;
+                };
+
+                legend.addTo(state.map);
+            },
+
+         
+            renderMarkers() {
+                state.data.forEach(feature => {
+                    const props = feature.properties;
+                    const coords = Utils.getCoordinates(feature.geometry);
+
+                    if (!coords) return;
+
+                    const icon = L.divIcon({
+                        className: 'marker',
+                        html: String(props.fid_terrain),
+                        iconSize: null
+                    });
+
+                    const marker = L.marker([coords.lat, coords.lon], { icon })
+                        .addTo(state.map)
+                        .on('click', () => UI.selectRecord(props.fid_terrain));
+
+                    state.markers[props.fid_terrain] = marker;
+                });
+            },
+
+        
+            fitBounds() {
+                if (state.data.length === 0) return;
+
+                const bounds = state.data.map(feature => {
+                    const coords = Utils.getCoordinates(feature.geometry);
+                    return [coords.lat, coords.lon];
+                });
+
+                state.map.fitBounds(bounds, { padding: [30, 30] });
+            },
+
+          
+            centerOn(lat, lon, zoom = 17) {
+                state.map.setView([lat, lon], zoom);
+            }
+        };
+
+     
+        const UI = {
+          
+            updateCount() {
+                document.getElementById('count').textContent = state.data.length;
+            },
+
+         
+            createCardHTML(feature) {
+                const props = feature.properties;
+                const coords = Utils.getCoordinates(feature.geometry);
+                const mapsUrl = coords ? Utils.getGoogleMapsLink(coords.lat, coords.lon) : '#';
+
+                return `
+                    <div class="card" data-fid="${props.fid_terrain}">
+                        <div class="card__fid">#${props.fid_terrain}</div>
+                        ${props.ANOMALIE_REGARD 
+                            ? `<div class="card__anomalie">🔴 Regard: ${props.ANOMALIE_REGARD}</div>` 
+                            : ''}
+                        ${props.ANOMALIE_TAMPON 
+                            ? `<div class="card__anomalie">🔴 Tampon: ${props.ANOMALIE_TAMPON}</div>` 
+                            : ''}
+                        <div class="card__location">
+                            📍 <a href="${mapsUrl}" target="_blank">Google Maps</a>
+                            <button class="btn btn--copy" 
+                                    onclick="event.stopPropagation(); copyLink(${coords.lat}, ${coords.lon}, this)">
+                                📋 Copier
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+         
+            renderList() {
+                const container = document.getElementById('sidebar');
+                container.innerHTML = state.data.map(f => this.createCardHTML(f)).join('');
+
+            
+                container.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                        this.selectRecord(parseInt(card.dataset.fid, 10));
+                    });
+                });
+            },
+
+            createPopupHTML(feature) {
+                const props = feature.properties;
+                const coords = Utils.getCoordinates(feature.geometry);
+                const mapsUrl = Utils.getGoogleMapsLink(coords.lat, coords.lon);
+                const formUrl = `${CONFIG.googleForm.url}&${CONFIG.googleForm.fidField}=${props.fid_terrain}`;
+
+                const hasAnomalies = props.ANOMALIE_REGARD || props.ANOMALIE_TAMPON;
+
+                return `
+                    <div class="popup">
+                        <h3 class="popup__title">Regard #${props.fid_terrain}</h3>
+                        
+                        ${hasAnomalies ? `
+                            <div class="popup__info">
+                                ${props.ANOMALIE_REGARD 
+                                    ? `<div><strong>Anomalie Regard:</strong> ${props.ANOMALIE_REGARD}</div>` 
+                                    : ''}
+                                ${props.ANOMALIE_TAMPON 
+                                    ? `<div><strong>Anomalie Tampon:</strong> ${props.ANOMALIE_TAMPON}</div>` 
+                                    : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="popup__location">
+                            <a href="${mapsUrl}" target="_blank">📍 Ouvrir dans Google Maps</a>
+                            <button class="btn btn--copy-large" 
+                                    onclick="copyLink(${coords.lat}, ${coords.lon}, this)">
+                                📋 Copier le lien pour WhatsApp
+                            </button>
+                        </div>
+                        
+                        <a href="${formUrl}" target="_blank" class="btn" style="margin-top: 0.5rem;">
+                            📝 Signaler intervention
+                        </a>
+                    </div>
+                `;
+            },
+
+        
+            selectRecord(fidTerrain) {
+                const feature = state.data.find(f => f.properties.fid_terrain === fidTerrain);
+                if (!feature) return;
+
+                const coords = Utils.getCoordinates(feature.geometry);
+
+            
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.remove('is-selected');
+                });
+
+                const selectedCard = document.querySelector(`.card[data-fid="${fidTerrain}"]`);
+                if (selectedCard) {
+                    selectedCard.classList.add('is-selected');
+                    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+
+                
+                MapManager.centerOn(coords.lat, coords.lon);
+                state.markers[fidTerrain]
+                    .bindPopup(this.createPopupHTML(feature))
+                    .openPopup();
+            },
+
+          
+            showError(message) {
+                document.getElementById('sidebar').innerHTML = `
+                    <div style="padding: 1rem; color: #DC2626;">
+                        <strong>Erreur:</strong> ${message}
+                    </div>
+                `;
+            }
+        };
+
+
+        const DataLoader = {
+       
+            async load() {
+                try {
+                    const response = await fetch(CONFIG.dataFile);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Fichier "${CONFIG.dataFile}" non trouvé.`);
+                    }
+
+                    const geojson = await response.json();
+                    state.data = Utils.filterByRetourTerrain(geojson.features);
+
+                    return true;
+                } catch (error) {
+                    console.error('Erreur de chargement:', error);
+                    UI.showError(error.message);
+                    return false;
+                }
+            }
+        };
+
+      
+        async function init() {
+           
+            MapManager.init();
+
+           
+            const success = await DataLoader.load();
+            if (!success) return;
+
+           
+            UI.updateCount();
+            UI.renderList();
+            MapManager.renderMarkers();
+            MapManager.fitBounds();
+
+            document.getElementById('btnExport').addEventListener('click', () => {
+                ExcelExporter.export();
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', init);
+
+    })();
+    </script>
 </body>
 </html>
