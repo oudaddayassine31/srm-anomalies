@@ -464,33 +464,41 @@
 
         const ExcelExporter = {
  
-            export() {
-                const excelData = state.data.map(feature => {
-                    const props = feature.properties;
-                    const coords = Utils.getCoordinates(feature.geometry);
+export() {
+    const excelData = state.data.map(feature => {
+        const props = feature.properties;
+        const coords = Utils.getCoordinates(feature.geometry);
 
-                    return {
-                        'fid_terrain': props.fid_terrain,
-                        'lien_google_maps': coords 
-                            ? Utils.getGoogleMapsLink(coords.lat, coords.lon) 
-                            : ''
-                    };
-                });
+        // Combiner les anomalies en une seule chaîne
+        const anomalies = [
+            props.ANOMALIE_REGARD ? `Regard: ${props.ANOMALIE_REGARD}` : '',
+            props.ANOMALIE_TAMPON ? `Tampon: ${props.ANOMALIE_TAMPON}` : '',
+            props.DESCRIPTION_ANOMALIE ? `Description: ${props.DESCRIPTION_ANOMALIE}` : ''
+        ].filter(Boolean).join(' | ');
 
-                const worksheet = XLSX.utils.json_to_sheet(excelData);
-                const workbook = XLSX.utils.book_new();
-                
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Regards');
+        return {
+            'fid_terrain': props.fid_terrain,
+            'anomalie': anomalies,
+            'lien_google_maps': coords 
+                ? Utils.getGoogleMapsLink(coords.lat, coords.lon) 
+                : ''
+        };
+    });
 
-            
-                worksheet['!cols'] = [
-                    { wch: 15 },  // fid_terrain
-                    { wch: 50 }   // lien_google_maps
-                ];
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Regards');
 
-                const filename = `regards_retour_terrain_${Utils.getTodayDate()}.xlsx`;
-                XLSX.writeFile(workbook, filename);
-            }
+    worksheet['!cols'] = [
+        { wch: 15 },  // fid_terrain
+        { wch: 60 },  // anomalie
+        { wch: 50 }   // lien_google_maps
+    ];
+
+    const filename = `regards_retour_terrain_${Utils.getTodayDate()}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+}
         };
 
         const MapManager = {
@@ -602,6 +610,9 @@
                         ${props.ANOMALIE_TAMPON 
                             ? `<div class="card__anomalie">🔴 Tampon: ${props.ANOMALIE_TAMPON}</div>` 
                             : ''}
+                        ${props.DESCRIPTION_ANOMALIE 
+                            ? `<div class="card__anomalie">📝 Description: ${props.DESCRIPTION_ANOMALIE}</div>` 
+                            : ''}
                         <div class="card__location">
                             📍 <a href="${mapsUrl}" target="_blank">Google Maps</a>
                             <button class="btn btn--copy" 
@@ -646,6 +657,9 @@
                                     : ''}
                                 ${props.ANOMALIE_TAMPON 
                                     ? `<div><strong>Anomalie Tampon:</strong> ${props.ANOMALIE_TAMPON}</div>` 
+                                    : ''}
+                                ${props.DESCRIPTION_ANOMALIE 
+                                    ? `<div><strong>Description:</strong> ${props.DESCRIPTION_ANOMALIE}</div>` 
                                     : ''}
                             </div>
                         ` : ''}
