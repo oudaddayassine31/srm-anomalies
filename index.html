@@ -473,7 +473,7 @@ export() {
         const anomalies = [
             props.ANOMALIE_REGARD ? `Regard: ${props.ANOMALIE_REGARD}` : '',
             props.ANOMALIE_TAMPON ? `Tampon: ${props.ANOMALIE_TAMPON}` : '',
-            props.DESCRIPTION_ANOMALIE ? `Description: ${props.DESCRIPTION_ANOMALIE}` : ''
+            props[" DESCRIPTION_ANOMALIE"] ? `Description: ${props[" DESCRIPTION_ANOMALIE"] }` : ''
         ].filter(Boolean).join(' | ');
 
         return {
@@ -610,8 +610,8 @@ export() {
                         ${props.ANOMALIE_TAMPON 
                             ? `<div class="card__anomalie">🔴 Tampon: ${props.ANOMALIE_TAMPON}</div>` 
                             : ''}
-                        ${props.DESCRIPTION_ANOMALIE 
-                            ? `<div class="card__anomalie">📝 Description: ${props.DESCRIPTION_ANOMALIE}</div>` 
+                        ${props[" DESCRIPTION_ANOMALIE"] 
+                            ? `<div class="card__anomalie">📝 Description: ${props[" DESCRIPTION_ANOMALIE"] }</div>` 
                             : ''}
                         <div class="card__location">
                             📍 <a href="${mapsUrl}" target="_blank">Google Maps</a>
@@ -658,8 +658,8 @@ export() {
                                 ${props.ANOMALIE_TAMPON 
                                     ? `<div><strong>Anomalie Tampon:</strong> ${props.ANOMALIE_TAMPON}</div>` 
                                     : ''}
-                                ${props.DESCRIPTION_ANOMALIE 
-                                    ? `<div><strong>Description:</strong> ${props.DESCRIPTION_ANOMALIE}</div>` 
+                                ${props[" DESCRIPTION_ANOMALIE"]  
+                                    ? `<div><strong>Description:</strong> ${props[" DESCRIPTION_ANOMALIE"] }</div>` 
                                     : ''}
                             </div>
                         ` : ''}
