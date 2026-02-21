@@ -4,74 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRM Oriental - Gestion des Regards</title>
-    
-    <!-- Dépendances externes -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <style>
-
         :root {
-            --color-primary: #1E40AF;
-            --color-primary-dark: #1E3A8A;
-            --color-danger: #DC2626;
-            --color-danger-light: #FEE2E2;
-            --color-danger-dark: #991B1B;
-            --color-success: #10B981;
-            --color-success-light: #ECFDF5;
-            --color-warning: #F59E0B;
-            --color-warning-dark: #D97706;
-            --color-gray-50: #F8FAFC;
-            --color-gray-200: #E2E8F0;
-            --color-gray-400: #94A3B8;
-            --font-sans: 'DM Sans', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --primary: #1E40AF;
+            --primary-dark: #1E3A8A;
+            --danger: #DC2626;
+            --danger-light: #FEE2E2;
+            --danger-dark: #991B1B;
+            --success: #10B981;
+            --success-light: #ECFDF5;
+            --success-dark: #065F46;
+            --warning: #F59E0B;
+            --warning-dark: #D97706;
+            --gray-50: #F8FAFC;
+            --gray-200: #E2E8F0;
+            --gray-400: #94A3B8;
+            --sans: 'DM Sans', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-sans);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--sans); }
 
         .header {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
             padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+        .header h1 { font-size: 1.1rem; }
+        .header small { opacity: 0.85; font-size: 0.75rem; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .big-count { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
 
-        .header__title {
-            font-size: 1.1rem;
-        }
-
-        .header__subtitle {
-            opacity: 0.9;
-            font-size: 0.75rem;
-        }
-
-        .header__actions {
+        .stats-bar {
+            background: #1E3A8A;
+            padding: 0.4rem 1.5rem;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 1.5rem;
+            font-size: 0.78rem;
+            color: #fff;
+            flex-wrap: wrap;
         }
+        .stat-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-red { background: #EF4444; }
+        .dot-green { background: #10B981; }
+        .stat-num { font-family: var(--mono); font-weight: 700; font-size: 0.9rem; }
 
-        .header__count {
-            font-family: var(--font-mono);
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
+        .sync-badge { font-size: 0.68rem; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
+        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #86EFAC; animation: blink 2s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .btn {
             display: block;
-            background: var(--color-primary);
+            background: var(--primary);
             color: #fff;
             text-align: center;
             padding: 0.6rem;
@@ -83,684 +76,524 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-export { background: var(--success); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 6px; }
+        .btn-export:hover { background: #059669; }
+        .btn-copy { background: var(--warning); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; }
+        .btn-copy:hover { background: var(--warning-dark); }
+        .btn-copy.copied { background: var(--success); }
+        .btn-copy-lg { background: var(--warning); padding: 6px 12px; border-radius: 5px; font-size: 0.8rem; width: 100%; }
+        .btn-copy-lg:hover { background: var(--warning-dark); }
 
-        .btn:hover {
-            background: var(--color-primary-dark);
-        }
-
-        .btn--export {
-            background: var(--color-success);
-            padding: 8px 16px;
+        .filter-bar { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0.5rem; display: flex; gap: 6px; }
+        .filter-btn {
+            flex: 1;
+            padding: 5px 8px;
             border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn--export:hover {
-            background: #059669;
-        }
-
-        .btn--copy {
-            background: var(--color-warning);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-        }
-
-        .btn--copy:hover {
-            background: var(--color-warning-dark);
-        }
-
-        .btn--copy.is-copied {
-            background: var(--color-success);
-        }
-
-        .btn--copy-large {
-            background: var(--color-warning);
-            padding: 6px 12px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            width: 100%;
-        }
-
-        .btn--copy-large:hover {
-            background: var(--color-warning-dark);
-        }
-
-
-        .main {
-            display: flex;
-            height: calc(100vh - 110px);
-        }
-
-        .footer {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-            color: #fff;
-            padding: 0.6rem 1.5rem;
+            border: 2px solid var(--gray-200);
+            background: #fff;
+            font-family: var(--sans);
+            font-weight: 600;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.15s;
             text-align: center;
-            font-size: 0.75rem;
         }
+        .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+        .f-all     { background: #EFF6FF; border-color: var(--primary); color: var(--primary); }
+        .f-pending { background: #FEF2F2; border-color: var(--danger); color: var(--danger-dark); }
+        .f-treated { background: var(--success-light); border-color: var(--success); color: var(--success-dark); }
 
+        .layout { display: flex; height: calc(100vh - 135px); }
 
-        .sidebar {
-            width: 320px;
-            background: var(--color-gray-50);
-            border-right: 1px solid var(--color-gray-200);
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
+        .sidebar { width: 320px; background: var(--gray-50); border-right: 1px solid var(--gray-200); display: flex; flex-direction: column; }
+        .sidebar-list { overflow-y: auto; flex: 1; padding: 0.5rem; }
 
         .card {
             background: #fff;
-            border: 2px solid var(--color-gray-200);
-            border-left: 4px solid var(--color-danger);
+            border: 2px solid var(--gray-200);
+            border-left: 4px solid var(--danger);
             border-radius: 8px;
             padding: 0.7rem;
             margin-bottom: 0.5rem;
             cursor: pointer;
             transition: all 0.2s;
         }
+        .card:hover { border-color: #3B82F6; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .card.selected { background: #EFF6FF; border-color: var(--primary); }
+        .card.treated { border-left-color: var(--success); opacity: 0.82; }
+        .card.treated:hover { opacity: 1; }
 
-        .card:hover {
-            border-color: #3B82F6;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+        .card-head { display: flex; align-items: center; justify-content: space-between; }
+        .card-fid { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--primary); }
 
-        .card.is-selected {
-            background: #EFF6FF;
-            border-color: var(--color-primary);
-        }
+        .badge { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-pending { background: var(--danger-light); color: var(--danger-dark); }
+        .badge-treated { background: var(--success-light); color: var(--success-dark); }
 
-        .card__fid {
-            font-family: var(--font-mono);
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--color-primary);
-        }
+        .card-anomalie { font-size: 0.73rem; color: var(--danger); margin-top: 0.3rem; font-weight: 600; }
+        .card-interv { font-size: 0.71rem; color: var(--success-dark); margin-top: 0.25rem; }
+        .card-loc { font-size: 0.7rem; margin-top: 0.4rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .card-loc a { color: var(--success); text-decoration: none; }
+        .card-loc a:hover { text-decoration: underline; }
 
-        .card__anomalie {
-            font-size: 0.73rem;
-            color: var(--color-danger);
-            margin-top: 0.3rem;
-            font-weight: 600;
-        }
-
-        .card__location {
-            font-size: 0.7rem;
-            margin-top: 0.4rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .card__location a {
-            color: var(--color-success);
-            text-decoration: none;
-        }
-
-        .card__location a:hover {
-            text-decoration: underline;
-        }
-
-        /* =============================================
-           CSS - Carte Leaflet
-           ============================================= */
-        #map {
-            flex: 1;
-            height: 100%;
-        }
+        #map { flex: 1; height: 100%; }
 
         .marker {
-            background: var(--color-danger-light);
-            border: 2px solid var(--color-danger);
+            background: var(--danger-light);
+            border: 2px solid var(--danger);
             border-radius: 4px;
             padding: 1px 5px;
-            font-family: var(--font-mono);
+            font-family: var(--mono);
             font-size: 11px;
             font-weight: 700;
-            color: var(--color-danger-dark);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            color: var(--danger-dark);
+            box-shadow: 0 1px 3px rgba(0,0,0,.3);
             white-space: nowrap;
         }
+        .marker-ok { background: #D1FAE5; border-color: var(--success); color: var(--success-dark); opacity: 0.75; }
 
-        .legend {
-            position: absolute;
-            bottom: 20px;
-            left: 10px;
-            background: #fff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            font-size: 0.7rem;
-        }
+        .legend { background: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); font-size: 0.7rem; line-height: 1.9; }
+        .legend-row { display: flex; align-items: center; gap: 6px; }
 
- 
-        .leaflet-popup-content-wrapper {
-            border-radius: 8px;
-        }
+        .leaflet-popup-content-wrapper { border-radius: 8px; }
+        .leaflet-popup-content { margin: 0; min-width: 280px; }
 
-        .leaflet-popup-content {
-            margin: 0;
-            min-width: 280px;
-        }
+        .popup { padding: 0.8rem; }
+        .popup-title { font-family: var(--mono); font-size: 1.2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0.5rem; margin-bottom: 0.6rem; color: var(--primary); display: flex; align-items: center; justify-content: space-between; }
+        .popup-anomalies { background: #FEF2F2; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
+        .popup-anomalies div { margin-bottom: 0.2rem; }
+        .popup-anomalies strong { color: var(--danger-dark); }
+        .popup-treated { background: var(--success-light); border: 1px solid #6EE7B7; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
+        .popup-treated strong { color: var(--success-dark); }
+        .popup-loc { background: #F0FDF4; padding: 0.5rem; border-radius: 5px; margin-bottom: 0.6rem; }
+        .popup-loc a { color: var(--success); text-decoration: none; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 6px; }
 
-        .popup {
-            padding: 0.8rem;
-        }
+        .leaflet-control-layers { padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 0.9rem; }
+        .leaflet-control-layers label { margin: 6px 0; font-weight: 600; }
 
-        .popup__title {
-            font-family: var(--font-mono);
-            font-size: 1.2rem;
-            border-bottom: 2px solid var(--color-gray-200);
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.6rem;
-            color: var(--color-primary);
-        }
-
-        .popup__info {
-            background: #FEF2F2;
-            padding: 0.5rem;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .popup__info div {
-            margin-bottom: 0.25rem;
-        }
-
-        .popup__info strong {
-            color: var(--color-danger-dark);
-        }
-
-        .popup__location {
-            background: var(--color-success-light);
-            padding: 0.5rem;
-            border-radius: 5px;
-            margin-bottom: 0.6rem;
-        }
-
-        .popup__location a {
-            color: var(--color-success);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .popup__location a:hover {
-            text-decoration: underline;
-        }
+        footer { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 0.6rem 1.5rem; text-align: center; font-size: 0.75rem; }
 
         @media (max-width: 700px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: 35%;
-            }
-
-            .header {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; height: 40%; }
+            .header { flex-wrap: wrap; gap: 10px; }
         }
-        /* Rendre le switch OSM/Satellite plus visible */
-.leaflet-control-layers {
-  padding: 10px 12px;
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  font-size: 0.9rem;
-}
-
-.leaflet-control-layers label {
-  margin: 6px 0;
-  font-weight: 600;
-}
-
     </style>
 </head>
-
 <body>
 
-    <header class="header">
-        <div>
-            <h1 class="header__title">💧 SRM Oriental ANOMALIES</h1>
-            <small class="header__subtitle">Réseau AEP - Regards à traiter</small>
+<header class="header">
+    <div>
+        <h1>💧 SRM Oriental ANOMALIES</h1>
+        <small>Réseau AEP - Regards à traiter</small>
+    </div>
+    <div class="header-right">
+        <div class="sync-badge" id="syncStatus"><span class="pulse"></span><span>Chargement…</span></div>
+        <button class="btn btn-export" id="btnExport">📥 Exporter Excel</button>
+        <div style="text-align:right">
+            <div class="big-count" id="count">-</div>
+            <small>regards</small>
         </div>
-        <div class="header__actions">
-            <button class="btn btn--export" id="btnExport">
-                📥 Exporter Excel
-            </button>
-            <div style="text-align: right;">
-                <div class="header__count" id="count">-</div>
-                <small>regards</small>
-            </div>
+    </div>
+</header>
+
+<div class="stats-bar">
+    <div class="stat-item"><span class="dot dot-red"></span><span class="stat-num" id="statPending">-</span>&nbsp;En attente</div>
+    <div class="stat-item"><span class="dot dot-green"></span><span class="stat-num" id="statTreated">-</span>&nbsp;Traités</div>
+    <div style="margin-left:auto; font-size:0.7rem; opacity:0.7" id="lastSync"></div>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="filter-bar">
+            <button class="filter-btn f-all" data-filter="all">🗂 Tous</button>
+            <button class="filter-btn" data-filter="pending">🔴 En attente</button>
+            <button class="filter-btn" data-filter="treated">✅ Traités</button>
         </div>
-    </header>
-
-
-    <main class="main">
-        <aside class="sidebar" id="sidebar"></aside>
-        <div id="map"></div>
-    </main>
-
-    <footer class="footer">
-        © 2026 ETAFAT. Tous droits réservés.
-    </footer>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-    (function() {
-        'use strict';
-
-        const CONFIG = {
-            dataFile: 'regard.geojson',
-            googleForm: {
-                url: 'https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=pp_url',
-                fidField: 'entry.57826848'
-            },
-            map: {
-                initialCenter: [34.68, -2.0],
-                initialZoom: 10,
-                tileLayers: {
-                    osm: {
-                        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        name: 'OpenStreetMap'
-                    },
-                    satellite: {
-                        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                        name: 'Satellite'
-                    }
-                }
-            }
-        };
-
-
-        const state = {
-            map: null,
-            markers: {},
-            data: []
-        };
-
-
-        const Utils = {
-
-            getGoogleMapsLink(lat, lon) {
-                return `https://www.google.com/maps?q=${lat},${lon}`;
-            },
-
-
-            getCoordinates(geometry) {
-                if (!geometry) return null;
-
-                switch (geometry.type) {
-                    case 'Point':
-                        return {
-                            lat: geometry.coordinates[1],
-                            lon: geometry.coordinates[0]
-                        };
-
-                    case 'Polygon':
-                        const ring = geometry.coordinates[0];
-                        const centroid = ring.reduce(
-                            (acc, coord) => ({
-                                lon: acc.lon + coord[0],
-                                lat: acc.lat + coord[1]
-                            }),
-                            { lon: 0, lat: 0 }
-                        );
-                        return {
-                            lat: centroid.lat / ring.length,
-                            lon: centroid.lon / ring.length
-                        };
-
-                    default:
-                        return null;
-                }
-            },
-
-            filterByRetourTerrain(features) {
-                return features.filter(feature => {
-                    const value = feature.properties.RETOUR_TERRAIN;
-                    return value && value.toLowerCase() === 'oui';
-                });
-            },
-
-
-            getTodayDate() {
-                return new Date().toISOString().split('T')[0];
-            }
-        };
-
-
-        const Clipboard = {
-  
-            copyLink(lat, lon, button) {
-                const link = Utils.getGoogleMapsLink(lat, lon);
-                const originalText = button.textContent;
-
-                navigator.clipboard.writeText(link).then(() => {
-                    button.textContent = '✓ Copié!';
-                    button.classList.add('is-copied');
-
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.classList.remove('is-copied');
-                    }, 2000);
-                });
-            }
-        };
-
-        window.copyLink = Clipboard.copyLink;
-
-
-        const ExcelExporter = {
- 
-export() {
-    const excelData = state.data.map(feature => {
-        const props = feature.properties;
-        const coords = Utils.getCoordinates(feature.geometry);
-
-        // Combiner les anomalies en une seule chaîne
-        const anomalies = [
-            props.ANOMALIE_REGARD ? `Regard: ${props.ANOMALIE_REGARD}` : '',
-            props.ANOMALIE_TAMPON ? `Tampon: ${props.ANOMALIE_TAMPON}` : '',
-            props[" DESCRIPTION_ANOMALIE"] ? `Description: ${props[" DESCRIPTION_ANOMALIE"] }` : ''
-        ].filter(Boolean).join(' | ');
-
-        return {
-            'fid_terrain': props.fid_terrain,
-            'anomalie': anomalies,
-            'lien_google_maps': coords 
-                ? Utils.getGoogleMapsLink(coords.lat, coords.lon) 
-                : ''
-        };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
-    const workbook = XLSX.utils.book_new();
-    
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Regards');
-
-    worksheet['!cols'] = [
-        { wch: 15 },  // fid_terrain
-        { wch: 60 },  // anomalie
-        { wch: 50 }   // lien_google_maps
-    ];
-
-    const filename = `regards_retour_terrain_${Utils.getTodayDate()}.xlsx`;
-    XLSX.writeFile(workbook, filename);
-}
-        };
-
-        const MapManager = {
-
-       
-            init() {
-                state.map = L.map('map').setView(
-                    CONFIG.map.initialCenter,
-                    CONFIG.map.initialZoom
-                );
-
-                // Couches de base
-                const osmLayer = L.tileLayer(CONFIG.map.tileLayers.osm.url, {
-                    attribution: '© OpenStreetMap'
-                });
-
-                const satelliteLayer = L.tileLayer(CONFIG.map.tileLayers.satellite.url, {
-                    attribution: '© Esri'
-                });
-
-                // Ajouter OSM par défaut
-                osmLayer.addTo(state.map);
-
-                // Contrôle pour switcher entre les couches
-                L.control.layers(
-                { 'OpenStreetMap': osmLayer, 'Satellite': satelliteLayer },
-                null,
-                { collapsed: false, position: 'topright' }
-                ).addTo(state.map);
-
-                this.addLegend();
-            },
-
-       
-            addLegend() {
-                const legend = L.control({ position: 'bottomleft' });
-
-                legend.onAdd = () => {
-                    const div = L.DomUtil.create('div', 'legend');
-                    div.innerHTML = `
-                        <strong>Légende:</strong> 
-                        <span class="marker" style="margin-left:5px">123</span> = FID Terrain
-                    `;
-                    return div;
-                };
-
-                legend.addTo(state.map);
-            },
-
-         
-            renderMarkers() {
-                state.data.forEach(feature => {
-                    const props = feature.properties;
-                    const coords = Utils.getCoordinates(feature.geometry);
-
-                    if (!coords) return;
-
-                    const icon = L.divIcon({
-                        className: 'marker',
-                        html: String(props.fid_terrain),
-                        iconSize: null
-                    });
-
-                    const marker = L.marker([coords.lat, coords.lon], { icon })
-                        .addTo(state.map)
-                        .on('click', () => UI.selectRecord(props.fid_terrain));
-
-                    state.markers[props.fid_terrain] = marker;
-                });
-            },
-
-        
-            fitBounds() {
-                if (state.data.length === 0) return;
-
-                const bounds = state.data.map(feature => {
-                    const coords = Utils.getCoordinates(feature.geometry);
-                    return [coords.lat, coords.lon];
-                });
-
-                state.map.fitBounds(bounds, { padding: [30, 30] });
-            },
-
-          
-            centerOn(lat, lon, zoom = 17) {
-                state.map.setView([lat, lon], zoom);
-            }
-        };
-
-     
-        const UI = {
-          
-            updateCount() {
-                document.getElementById('count').textContent = state.data.length;
-            },
-
-         
-            createCardHTML(feature) {
-                const props = feature.properties;
-                const coords = Utils.getCoordinates(feature.geometry);
-                const mapsUrl = coords ? Utils.getGoogleMapsLink(coords.lat, coords.lon) : '#';
-
-                return `
-                    <div class="card" data-fid="${props.fid_terrain}">
-                        <div class="card__fid">#${props.fid_terrain}</div>
-                        ${props.ANOMALIE_REGARD 
-                            ? `<div class="card__anomalie">🔴 Regard: ${props.ANOMALIE_REGARD}</div>` 
-                            : ''}
-                        ${props.ANOMALIE_TAMPON 
-                            ? `<div class="card__anomalie">🔴 Tampon: ${props.ANOMALIE_TAMPON}</div>` 
-                            : ''}
-                        ${props[" DESCRIPTION_ANOMALIE"] 
-                            ? `<div class="card__anomalie">📝 Description: ${props[" DESCRIPTION_ANOMALIE"] }</div>` 
-                            : ''}
-                        <div class="card__location">
-                            📍 <a href="${mapsUrl}" target="_blank">Google Maps</a>
-                            <button class="btn btn--copy" 
-                                    onclick="event.stopPropagation(); copyLink(${coords.lat}, ${coords.lon}, this)">
-                                📋 Copier
-                            </button>
-                        </div>
-                    </div>
-                `;
-            },
-
-         
-            renderList() {
-                const container = document.getElementById('sidebar');
-                container.innerHTML = state.data.map(f => this.createCardHTML(f)).join('');
-
-            
-                container.querySelectorAll('.card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                        this.selectRecord(parseInt(card.dataset.fid, 10));
-                    });
-                });
-            },
-
-            createPopupHTML(feature) {
-                const props = feature.properties;
-                const coords = Utils.getCoordinates(feature.geometry);
-                const mapsUrl = Utils.getGoogleMapsLink(coords.lat, coords.lon);
-                const formUrl = `${CONFIG.googleForm.url}&${CONFIG.googleForm.fidField}=${props.fid_terrain}`;
-
-                const hasAnomalies = props.ANOMALIE_REGARD || props.ANOMALIE_TAMPON;
-
-                return `
-                    <div class="popup">
-                        <h3 class="popup__title">Regard #${props.fid_terrain}</h3>
-                        
-                        ${hasAnomalies ? `
-                            <div class="popup__info">
-                                ${props.ANOMALIE_REGARD 
-                                    ? `<div><strong>Anomalie Regard:</strong> ${props.ANOMALIE_REGARD}</div>` 
-                                    : ''}
-                                ${props.ANOMALIE_TAMPON 
-                                    ? `<div><strong>Anomalie Tampon:</strong> ${props.ANOMALIE_TAMPON}</div>` 
-                                    : ''}
-                                ${props[" DESCRIPTION_ANOMALIE"]  
-                                    ? `<div><strong>Description:</strong> ${props[" DESCRIPTION_ANOMALIE"] }</div>` 
-                                    : ''}
-                            </div>
-                        ` : ''}
-                        
-                        <div class="popup__location">
-                            <a href="${mapsUrl}" target="_blank">📍 Ouvrir dans Google Maps</a>
-                            <button class="btn btn--copy-large" 
-                                    onclick="copyLink(${coords.lat}, ${coords.lon}, this)">
-                                📋 Copier le lien pour WhatsApp
-                            </button>
-                        </div>
-                        
-                        <a href="${formUrl}" target="_blank" class="btn" style="margin-top: 0.5rem;">
-                            📝 Signaler intervention
-                        </a>
-                    </div>
-                `;
-            },
-
-        
-            selectRecord(fidTerrain) {
-                const feature = state.data.find(f => f.properties.fid_terrain === fidTerrain);
-                if (!feature) return;
-
-                const coords = Utils.getCoordinates(feature.geometry);
-
-            
-                document.querySelectorAll('.card').forEach(card => {
-                    card.classList.remove('is-selected');
-                });
-
-                const selectedCard = document.querySelector(`.card[data-fid="${fidTerrain}"]`);
-                if (selectedCard) {
-                    selectedCard.classList.add('is-selected');
-                    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-
-                
-                MapManager.centerOn(coords.lat, coords.lon);
-                state.markers[fidTerrain]
-                    .bindPopup(this.createPopupHTML(feature))
-                    .openPopup();
-            },
-
-          
-            showError(message) {
-                document.getElementById('sidebar').innerHTML = `
-                    <div style="padding: 1rem; color: #DC2626;">
-                        <strong>Erreur:</strong> ${message}
-                    </div>
-                `;
-            }
-        };
-
-
-        const DataLoader = {
-       
-            async load() {
-                try {
-                    const response = await fetch(CONFIG.dataFile);
-                    
-                    if (!response.ok) {
-                        throw new Error(`Fichier "${CONFIG.dataFile}" non trouvé.`);
-                    }
-
-                    const geojson = await response.json();
-                    state.data = Utils.filterByRetourTerrain(geojson.features);
-
-                    return true;
-                } catch (error) {
-                    console.error('Erreur de chargement:', error);
-                    UI.showError(error.message);
-                    return false;
-                }
-            }
-        };
-
-      
-        async function init() {
-           
-            MapManager.init();
-
-           
-            const success = await DataLoader.load();
-            if (!success) return;
-
-           
-            UI.updateCount();
-            UI.renderList();
-            MapManager.renderMarkers();
-            MapManager.fitBounds();
-
-            document.getElementById('btnExport').addEventListener('click', () => {
-                ExcelExporter.export();
-            });
+        <div class="sidebar-list" id="sidebar"></div>
+    </aside>
+    <div id="map"></div>
+</div>
+
+<footer>© 2026 ETAFAT. Tous droits réservés.</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+
+    const CONFIG = {
+        dataFile: 'regard.geojson',
+        interventionsCSV: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVeCELfyOe4Fb8J7ZGlVUS1rSQhhoOopnuaz3FPv6yKJeazRe-VOGYwLa_VP4fT5qMFo_btWiVjSf0/pub?gid=2060519266&single=true&output=csv',
+        googleForm: {
+            url: 'https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=pp_url',
+            fidField: 'entry.57826848'
+        },
+        map: {
+            center: [34.68, -2.0],
+            zoom: 10,
+            osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
         }
+    };
 
+    const state = {
+        map: null,
+        markers: {},
+        data: [],
+        interventions: new Map(),
+        filter: 'all'
+    };
 
-        document.addEventListener('DOMContentLoaded', init);
+    function mapsLink(lat, lon) {
+        return `https://www.google.com/maps?q=${lat},${lon}`;
+    }
 
-    })();
-    </script>
+    function getCoords(geometry) {
+        if (!geometry) return null;
+        if (geometry.type === 'Point') {
+            return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
+        }
+        if (geometry.type === 'Polygon') {
+            const ring = geometry.coordinates[0];
+            const sum = ring.reduce((a, p) => ({ lon: a.lon + p[0], lat: a.lat + p[1] }), { lon: 0, lat: 0 });
+            return { lat: sum.lat / ring.length, lon: sum.lon / ring.length };
+        }
+        return null;
+    }
+
+    function today() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    function fmtDate(str) {
+        if (!str) return '';
+        const d = new Date(str);
+        return isNaN(d) ? str : d.toLocaleDateString('fr-FR');
+    }
+
+    function splitCSVLine(line) {
+        const result = [];
+        let cur = '';
+        let inQ = false;
+        for (const ch of line) {
+            if (ch === '"') { inQ = !inQ; continue; }
+            if (ch === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+            cur += ch;
+        }
+        result.push(cur);
+        return result;
+    }
+
+    function parseCSV(text) {
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 2) return [];
+        const headers = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+        const rows = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = splitCSVLine(lines[i]);
+            const row = {};
+            headers.forEach((h, idx) => { row[h] = (cols[idx] || '').trim(); });
+            rows.push(row);
+        }
+        return rows;
+    }
+
+    async function loadInterventions() {
+        try {
+            const resp = await fetch(CONFIG.interventionsCSV + '&t=' + Date.now());
+            if (!resp.ok) throw new Error('inaccessible');
+
+            const rows = parseCSV(await resp.text());
+
+            console.log('[DEBUG] Headers CSV:', rows.length > 0 ? Object.keys(rows[0]) : 'vide');
+            console.log('[DEBUG] Première ligne:', rows[0]);
+
+            rows.forEach(row => {
+                const fidRaw = row['fid du regard'] || row['fid_terrain'] || row['fid'] || '';
+                const fid = parseInt(fidRaw, 10);
+                if (isNaN(fid)) return;
+
+                const statusRaw = row['état de l\'intervention']
+                    || row['etat de l\'intervention']
+                    || row['état intervention']
+                    || row['etat']
+                    || row['statut']
+                    || '';
+
+                const isTreated = statusRaw.toLowerCase().includes('trait');
+                const ts = new Date(row['horodateur'] || 0).getTime();
+                const existing = state.interventions.get(fid);
+
+                if (!existing || ts >= existing._ts) {
+                    state.interventions.set(fid, {
+                        isTreated,
+                        status: statusRaw,
+                        date: row['date intervention'] || '',
+                        comment: row['commentaire'] || '',
+                        agent: row['nom et prénom'] || row['nom'] || '',
+                        _ts: ts
+                    });
+                }
+            });
+
+            const now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('syncStatus').innerHTML = `<span class="pulse"></span> Synchro ${now}`;
+            document.getElementById('lastSync').textContent = `Synchro : ${now}`;
+
+        } catch(e) {
+            console.warn('[CSV] Erreur:', e.message);
+            document.getElementById('syncStatus').innerHTML = `<span style="color:#FCA5A5">⚠ Erreur synchro</span>`;
+        }
+    }
+
+    window.copyLink = function(lat, lon, btn) {
+        navigator.clipboard.writeText(mapsLink(lat, lon)).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = '✓ Copié!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+
+    function exportExcel() {
+        const rows = state.data.map(f => {
+            const p = f.properties;
+            const coords = getCoords(f.geometry);
+            const interv = state.interventions.get(p.fid_terrain);
+            const anomalie = [
+                p.ANOMALIE_REGARD ? 'Regard: ' + p.ANOMALIE_REGARD : '',
+                p.ANOMALIE_TAMPON ? 'Tampon: ' + p.ANOMALIE_TAMPON : '',
+                p[' DESCRIPTION_ANOMALIE'] ? 'Desc: ' + p[' DESCRIPTION_ANOMALIE'] : ''
+            ].filter(Boolean).join(' | ');
+
+            return {
+                fid_terrain: p.fid_terrain,
+                anomalie,
+                statut: interv ? (interv.isTreated ? 'Traité' : 'En attente') : 'En attente',
+                date_intervention: interv ? interv.date : '',
+                commentaire: interv ? interv.comment : '',
+                agent: interv ? interv.agent : '',
+                lien_google_maps: coords ? mapsLink(coords.lat, coords.lon) : ''
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Regards');
+        ws['!cols'] = [{ wch: 15 }, { wch: 60 }, { wch: 12 }, { wch: 18 }, { wch: 40 }, { wch: 25 }, { wch: 50 }];
+        XLSX.writeFile(wb, `regards_${today()}.xlsx`);
+    }
+
+    function initMap() {
+        state.map = L.map('map').setView(CONFIG.map.center, CONFIG.map.zoom);
+        const osm = L.tileLayer(CONFIG.map.osm, { attribution: '© OpenStreetMap' });
+        const sat = L.tileLayer(CONFIG.map.satellite, { attribution: '© Esri' });
+        osm.addTo(state.map);
+        L.control.layers({ 'OpenStreetMap': osm, 'Satellite': sat }, null, { collapsed: false, position: 'topright' }).addTo(state.map);
+
+        const legend = L.control({ position: 'bottomleft' });
+        legend.onAdd = () => {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <strong>Légende :</strong><br>
+                <div class="legend-row"><span class="marker" style="display:inline-block">123</span>&nbsp;En attente</div>
+                <div class="legend-row" style="margin-top:4px"><span class="marker marker-ok" style="display:inline-block">123</span>&nbsp;Traité ✅</div>
+            `;
+            return div;
+        };
+        legend.addTo(state.map);
+    }
+
+    function renderMarkers() {
+        Object.values(state.markers).forEach(m => state.map.removeLayer(m));
+        state.markers = {};
+
+        state.data.forEach(f => {
+            const coords = getCoords(f.geometry);
+            if (!coords) return;
+            const fid = f.properties.fid_terrain;
+            const interv = state.interventions.get(fid);
+            const treated = interv && interv.isTreated;
+
+            const icon = L.divIcon({
+                className: treated ? 'marker marker-ok' : 'marker',
+                html: String(fid),
+                iconSize: null
+            });
+
+            state.markers[fid] = L.marker([coords.lat, coords.lon], { icon })
+                .addTo(state.map)
+                .on('click', () => selectRecord(fid));
+        });
+    }
+
+    function fitBounds() {
+        const pts = state.data.map(f => getCoords(f.geometry)).filter(Boolean).map(c => [c.lat, c.lon]);
+        if (pts.length) state.map.fitBounds(pts, { padding: [30, 30] });
+    }
+
+    function filteredData() {
+        if (state.filter === 'treated') return state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return i && i.isTreated; });
+        if (state.filter === 'pending')  return state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return !i || !i.isTreated; });
+        return state.data;
+    }
+
+    function updateStats() {
+        document.getElementById('count').textContent = state.data.length;
+        const n = state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return i && i.isTreated; }).length;
+        document.getElementById('statTreated').textContent = n;
+        document.getElementById('statPending').textContent = state.data.length - n;
+    }
+
+    function cardHTML(f) {
+        const p = f.properties;
+        const coords = getCoords(f.geometry);
+        const url = coords ? mapsLink(coords.lat, coords.lon) : '#';
+        const interv = state.interventions.get(p.fid_terrain);
+        const treated = interv && interv.isTreated;
+
+        const badge = treated
+            ? `<span class="badge badge-treated">✅ Traité</span>`
+            : `<span class="badge badge-pending">⏳ En attente</span>`;
+
+        const intervLine = treated ? `
+            <div class="card-interv">
+                📅 ${interv.date ? fmtDate(interv.date) : '—'}
+                ${interv.comment ? ' · ' + interv.comment : ''}
+                ${interv.agent   ? ' · 👤 ' + interv.agent : ''}
+            </div>` : '';
+
+        return `
+            <div class="card ${treated ? 'treated' : ''}" data-fid="${p.fid_terrain}">
+                <div class="card-head">
+                    <div class="card-fid">#${p.fid_terrain}</div>
+                    ${badge}
+                </div>
+                ${p.ANOMALIE_REGARD  ? `<div class="card-anomalie">🔴 Regard: ${p.ANOMALIE_REGARD}</div>` : ''}
+                ${p.ANOMALIE_TAMPON  ? `<div class="card-anomalie">🔴 Tampon: ${p.ANOMALIE_TAMPON}</div>` : ''}
+                ${p[' DESCRIPTION_ANOMALIE'] ? `<div class="card-anomalie">📝 ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
+                ${intervLine}
+                <div class="card-loc">
+                    📍 <a href="${url}" target="_blank">Google Maps</a>
+                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation(); copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>` : ''}
+                </div>
+            </div>`;
+    }
+
+    function renderList() {
+        const data = filteredData();
+        const el = document.getElementById('sidebar');
+        el.innerHTML = data.length
+            ? data.map(cardHTML).join('')
+            : `<div style="padding:1.5rem; text-align:center; color:var(--gray-400); font-size:0.85rem;">Aucun regard pour ce filtre.</div>`;
+
+        el.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', e => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                selectRecord(parseInt(card.dataset.fid, 10));
+            });
+        });
+    }
+
+    function popupHTML(f) {
+        const p = f.properties;
+        const coords = getCoords(f.geometry);
+        const url = mapsLink(coords.lat, coords.lon);
+        const formUrl = CONFIG.googleForm.url + '&' + CONFIG.googleForm.fidField + '=' + p.fid_terrain;
+        const interv = state.interventions.get(p.fid_terrain);
+        const treated = interv && interv.isTreated;
+
+        const badge = treated
+            ? `<span class="badge badge-treated">✅ Traité</span>`
+            : `<span class="badge badge-pending">⏳ En attente</span>`;
+
+        return `
+            <div class="popup">
+                <div class="popup-title">Regard #${p.fid_terrain} ${badge}</div>
+                ${p.ANOMALIE_REGARD || p.ANOMALIE_TAMPON || p[' DESCRIPTION_ANOMALIE'] ? `
+                    <div class="popup-anomalies">
+                        ${p.ANOMALIE_REGARD ? `<div><strong>Anomalie Regard:</strong> ${p.ANOMALIE_REGARD}</div>` : ''}
+                        ${p.ANOMALIE_TAMPON ? `<div><strong>Anomalie Tampon:</strong> ${p.ANOMALIE_TAMPON}</div>` : ''}
+                        ${p[' DESCRIPTION_ANOMALIE'] ? `<div><strong>Description:</strong> ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
+                    </div>` : ''}
+                ${treated ? `
+                    <div class="popup-treated">
+                        ✅ <strong>Intervention effectuée</strong><br>
+                        ${interv.date    ? '📅 ' + fmtDate(interv.date) + '<br>' : ''}
+                        ${interv.comment ? '💬 ' + interv.comment + '<br>' : ''}
+                        ${interv.agent   ? '👤 ' + interv.agent : ''}
+                    </div>` : ''}
+                <div class="popup-loc">
+                    <a href="${url}" target="_blank">📍 Ouvrir dans Google Maps</a>
+                    <button class="btn btn-copy-lg" onclick="copyLink(${coords.lat},${coords.lon},this)">📋 Copier le lien pour WhatsApp</button>
+                </div>
+                <a href="${formUrl}" target="_blank" class="btn" style="margin-top:0.5rem">📝 Signaler intervention</a>
+            </div>`;
+    }
+
+    function selectRecord(fid) {
+        const f = state.data.find(x => x.properties.fid_terrain === fid);
+        if (!f) return;
+        const coords = getCoords(f.geometry);
+
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        const card = document.querySelector(`.card[data-fid="${fid}"]`);
+        if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+        state.map.setView([coords.lat, coords.lon], 17);
+        state.markers[fid]?.bindPopup(popupHTML(f)).openPopup();
+    }
+
+    async function loadGeoJSON() {
+        try {
+            const resp = await fetch(CONFIG.dataFile);
+            if (!resp.ok) throw new Error(`"${CONFIG.dataFile}" non trouvé`);
+            const geojson = await resp.json();
+            state.data = geojson.features.filter(f => {
+                const v = f.properties.RETOUR_TERRAIN;
+                return v && v.toLowerCase() === 'oui';
+            });
+            return true;
+        } catch(e) {
+            document.getElementById('sidebar').innerHTML = `<div style="padding:1rem; color:var(--danger)"><strong>Erreur:</strong> ${e.message}</div>`;
+            return false;
+        }
+    }
+
+    async function init() {
+        initMap();
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.filter = btn.dataset.filter;
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('f-all', 'f-pending', 'f-treated'));
+                btn.classList.add('f-' + state.filter);
+                renderList();
+            });
+        });
+
+        const [ok] = await Promise.all([loadGeoJSON(), loadInterventions()]);
+        if (!ok) return;
+
+        updateStats();
+        renderList();
+        renderMarkers();
+        fitBounds();
+
+        document.getElementById('btnExport').addEventListener('click', exportExcel);
+
+        setInterval(async () => {
+            await loadInterventions();
+            updateStats();
+            renderList();
+            renderMarkers();
+        }, 5 * 60 * 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
 </body>
 </html>
