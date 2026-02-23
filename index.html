@@ -9,268 +9,135 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary: #1E40AF;
-            --primary-dark: #1E3A8A;
-            --danger: #DC2626;
-            --danger-light: #FEE2E2;
-            --danger-dark: #991B1B;
-            --success: #10B981;
-            --success-light: #ECFDF5;
-            --success-dark: #065F46;
-            --warning: #F59E0B;
-            --warning-dark: #D97706;
-            --inacc: #2563EB;
-            --inacc-light: #DBEAFE;
-            --inacc-dark: #1E3A8A;
-            --gray-50: #F8FAFC;
-            --gray-200: #E2E8F0;
-            --gray-400: #94A3B8;
-            --sans: 'DM Sans', sans-serif;
-            --mono: 'JetBrains Mono', monospace;
+            --primary: #1E40AF; --primary-dark: #1E3A8A;
+            --danger: #DC2626; --danger-light: #FEE2E2; --danger-dark: #991B1B;
+            --success: #10B981; --success-light: #ECFDF5; --success-dark: #065F46;
+            --warning: #F59E0B; --warning-dark: #D97706;
+            --inacc: #2563EB; --inacc-light: #DBEAFE; --inacc-dark: #1E3A8A;
+            --route: #7C3AED;
+            --gray-50: #F8FAFC; --gray-200: #E2E8F0; --gray-400: #94A3B8;
+            --sans: 'DM Sans', sans-serif; --mono: 'JetBrains Mono', monospace;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: var(--sans); }
 
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #fff;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 { font-size: 1.1rem; }
-        .header small { opacity: 0.85; font-size: 0.75rem; }
-        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .big-count { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+        .header { background: linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+        .header h1 { font-size:1.1rem; }
+        .header small { opacity:.85; font-size:.75rem; }
+        .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .big-count { font-family:var(--mono); font-size:1.5rem; font-weight:700; }
 
-        .stats-bar {
-            background: #1E3A8A;
-            padding: 0.4rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            font-size: 0.78rem;
-            color: #fff;
-            flex-wrap: wrap;
-        }
-        .stat-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .dot-red   { background: #EF4444; }
-        .dot-green { background: #10B981; }
-        .dot-blue  { background: #60A5FA; }
-        .stat-num { font-family: var(--mono); font-weight: 700; font-size: 0.9rem; }
+        .stats-bar { background:#1E3A8A; padding:.4rem 1.5rem; display:flex; align-items:center; gap:1.5rem; font-size:.78rem; color:#fff; flex-wrap:wrap; }
+        .stat-item { display:flex; align-items:center; gap:6px; }
+        .dot { width:10px; height:10px; border-radius:50%; }
+        .dot-red { background:#EF4444; } .dot-green { background:#10B981; } .dot-blue { background:#60A5FA; }
+        .stat-num { font-family:var(--mono); font-weight:700; font-size:.9rem; }
 
-        .sync-badge { font-size: 0.68rem; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
-        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #86EFAC; animation: blink 2s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .sync-badge { font-size:.68rem; opacity:.85; display:flex; align-items:center; gap:4px; }
+        .pulse { width:7px; height:7px; border-radius:50%; background:#86EFAC; animation:blink 2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-        .btn {
-            display: block;
-            background: var(--primary);
-            color: #fff;
-            text-align: center;
-            padding: 0.6rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn:hover { background: var(--primary-dark); }
-        .btn-export { background: var(--success); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 6px; }
-        .btn-export:hover { background: #059669; }
-        .btn-copy { background: var(--warning); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; }
-        .btn-copy:hover { background: var(--warning-dark); }
-        .btn-copy.copied { background: var(--success); }
-        .btn-copy-lg { background: var(--warning); padding: 6px 12px; border-radius: 5px; font-size: 0.8rem; width: 100%; }
-        .btn-copy-lg:hover { background: var(--warning-dark); }
-        .btn-gps { background: #7C3AED; padding: 8px 14px; border-radius: 6px; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; }
-        .btn-gps:hover { background: #6D28D9; }
-        .btn-gps.active { background: #059669; }
+        .btn { display:block; background:var(--primary); color:#fff; text-align:center; padding:.6rem; border-radius:5px; text-decoration:none; font-weight:600; font-size:.85rem; border:none; cursor:pointer; transition:background .2s; }
+        .btn:hover { background:var(--primary-dark); }
+        .btn-export { background:var(--success); padding:8px 16px; border-radius:6px; display:flex; align-items:center; gap:6px; }
+        .btn-export:hover { background:#059669; }
+        .btn-copy { background:var(--warning); padding:2px 8px; border-radius:4px; font-size:.65rem; }
+        .btn-copy:hover { background:var(--warning-dark); }
+        .btn-copy.copied { background:var(--success); }
+        .btn-copy-lg { background:var(--warning); padding:6px 12px; border-radius:5px; font-size:.8rem; width:100%; }
+        .btn-copy-lg:hover { background:var(--warning-dark); }
+        .btn-gps { background:#7C3AED; padding:8px 14px; border-radius:6px; display:flex; align-items:center; gap:6px; font-size:.82rem; }
+        .btn-gps:hover { background:#6D28D9; }
+        .btn-gps.active { background:#059669; }
 
-        /* ── NAVIGATE BAR ── */
-        .nav-bar {
-            background: #F8FAFC;
-            border-bottom: 2px solid var(--gray-200);
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .nav-bar label { font-size: 0.78rem; font-weight: 600; color: #374151; white-space: nowrap; }
-        .nav-input {
-            font-family: var(--mono);
-            font-size: 0.85rem;
-            font-weight: 700;
-            padding: 5px 10px;
-            border: 2px solid var(--gray-200);
-            border-radius: 6px;
-            width: 90px;
-            outline: none;
-            transition: border 0.15s;
-        }
-        .nav-input:focus { border-color: var(--primary); }
-        .nav-input.error { border-color: var(--danger); animation: shake 0.3s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
-        .btn-nav {
-            background: #7C3AED;
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 6px;
-            border: none;
-            font-family: var(--sans);
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-        .btn-nav:hover { background: #6D28D9; }
-        .nav-status {
-            font-size: 0.75rem;
-            color: var(--gray-400);
-            flex: 1;
-            min-width: 120px;
-        }
-        .nav-status.ok    { color: var(--success-dark); }
-        .nav-status.error { color: var(--danger); }
+        /* NAV BAR */
+        .nav-bar { background:#F8FAFC; border-bottom:2px solid var(--gray-200); padding:.5rem 1rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .nav-bar label { font-size:.78rem; font-weight:600; color:#374151; white-space:nowrap; }
+        .nav-input { font-family:var(--mono); font-size:.85rem; font-weight:700; padding:5px 10px; border:2px solid var(--gray-200); border-radius:6px; width:90px; outline:none; transition:border .15s; }
+        .nav-input:focus { border-color:var(--primary); }
+        .nav-input.error { border-color:var(--danger); animation:shake .3s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+        .btn-nav { background:var(--route); color:#fff; padding:6px 14px; border-radius:6px; border:none; font-family:var(--sans); font-weight:600; font-size:.8rem; cursor:pointer; display:flex; align-items:center; gap:6px; transition:background .2s; }
+        .btn-nav:hover { background:#6D28D9; }
+        .btn-nav:disabled { background:#9CA3AF; cursor:not-allowed; }
+        .btn-clear { background:#EF4444; color:#fff; padding:6px 12px; border-radius:6px; border:none; font-weight:600; font-size:.8rem; cursor:pointer; display:none; }
+        .btn-clear:hover { background:#DC2626; }
+        .nav-status { font-size:.75rem; color:var(--gray-400); flex:1; min-width:120px; }
+        .nav-status.ok { color:var(--success-dark); }
+        .nav-status.error { color:var(--danger); }
+        .nav-status.loading { color:var(--route); }
 
-        .filter-bar { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0.5rem; display: flex; gap: 6px; }
-        .filter-btn {
-            flex: 1;
-            padding: 5px 8px;
-            border-radius: 6px;
-            border: 2px solid var(--gray-200);
-            background: #fff;
-            font-family: var(--sans);
-            font-weight: 600;
-            font-size: 0.72rem;
-            cursor: pointer;
-            transition: all 0.15s;
-            text-align: center;
-        }
-        .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-        .f-all     { background: #EFF6FF; border-color: var(--primary); color: var(--primary); }
-        .f-pending { background: #FEF2F2; border-color: var(--danger); color: var(--danger-dark); }
-        .f-treated { background: var(--success-light); border-color: var(--success); color: var(--success-dark); }
-        .f-inacc   { background: var(--inacc-light); border-color: var(--inacc); color: var(--inacc-dark); }
+        /* ROUTE INFO */
+        .route-info { display:none; background:#EDE9FE; border-left:4px solid var(--route); padding:.45rem 1rem; font-size:.8rem; color:#4C1D95; font-weight:600; gap:16px; align-items:center; flex-wrap:wrap; }
+        .route-info.on { display:flex; }
 
-        .layout { display: flex; height: calc(100vh - 165px); }
+        .filter-bar { background:#fff; border-bottom:1px solid var(--gray-200); padding:.5rem; display:flex; gap:6px; }
+        .filter-btn { flex:1; padding:5px 8px; border-radius:6px; border:2px solid var(--gray-200); background:#fff; font-family:var(--sans); font-weight:600; font-size:.72rem; cursor:pointer; transition:all .15s; text-align:center; }
+        .filter-btn:hover { transform:translateY(-1px); box-shadow:0 2px 6px rgba(0,0,0,.1); }
+        .f-all     { background:#EFF6FF; border-color:var(--primary); color:var(--primary); }
+        .f-pending { background:#FEF2F2; border-color:var(--danger); color:var(--danger-dark); }
+        .f-treated { background:var(--success-light); border-color:var(--success); color:var(--success-dark); }
+        .f-inacc   { background:var(--inacc-light); border-color:var(--inacc); color:var(--inacc-dark); }
 
-        .sidebar { width: 320px; background: var(--gray-50); border-right: 1px solid var(--gray-200); display: flex; flex-direction: column; }
-        .sidebar-list { overflow-y: auto; flex: 1; padding: 0.5rem; }
+        .layout { display:flex; height:calc(100vh - 180px); }
+        .sidebar { width:320px; background:var(--gray-50); border-right:1px solid var(--gray-200); display:flex; flex-direction:column; }
+        .sidebar-list { overflow-y:auto; flex:1; padding:.5rem; }
 
-        .card {
-            background: #fff;
-            border: 2px solid var(--gray-200);
-            border-left: 4px solid var(--danger);
-            border-radius: 8px;
-            padding: 0.7rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .card:hover { border-color: #3B82F6; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
-        .card.selected { background: #EFF6FF; border-color: var(--primary); }
-        .card.treated  { border-left-color: var(--success); opacity: 0.82; }
-        .card.inacc    { border-left-color: var(--inacc); background: #F0F5FF; }
-        .card.treated:hover, .card.inacc:hover { opacity: 1; }
+        .card { background:#fff; border:2px solid var(--gray-200); border-left:4px solid var(--danger); border-radius:8px; padding:.7rem; margin-bottom:.5rem; cursor:pointer; transition:all .2s; }
+        .card:hover { border-color:#3B82F6; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+        .card.selected { background:#EFF6FF; border-color:var(--primary); }
+        .card.treated { border-left-color:var(--success); opacity:.82; }
+        .card.inacc { border-left-color:var(--inacc); background:#F0F5FF; }
+        .card.treated:hover,.card.inacc:hover { opacity:1; }
 
-        .card-head { display: flex; align-items: center; justify-content: space-between; }
-        .card-fid { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .card-head { display:flex; align-items:center; justify-content:space-between; }
+        .card-fid { font-family:var(--mono); font-size:1rem; font-weight:700; color:var(--primary); }
+        .badge { font-size:.62rem; font-weight:700; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:.05em; }
+        .badge-pending { background:var(--danger-light); color:var(--danger-dark); }
+        .badge-treated { background:var(--success-light); color:var(--success-dark); }
+        .badge-inacc   { background:var(--inacc-light); color:var(--inacc-dark); }
 
-        .badge { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .badge-pending { background: var(--danger-light);  color: var(--danger-dark); }
-        .badge-treated { background: var(--success-light); color: var(--success-dark); }
-        .badge-inacc   { background: var(--inacc-light);   color: var(--inacc-dark); }
+        .card-anomalie { font-size:.73rem; color:var(--danger); margin-top:.3rem; font-weight:600; }
+        .card-interv { font-size:.71rem; color:var(--success-dark); margin-top:.25rem; }
+        .card-loc { font-size:.7rem; margin-top:.4rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .card-loc a { color:var(--success); text-decoration:none; }
+        .card-loc a:hover { text-decoration:underline; }
 
-        .card-anomalie { font-size: 0.73rem; color: var(--danger); margin-top: 0.3rem; font-weight: 600; }
-        .card-interv   { font-size: 0.71rem; color: var(--success-dark); margin-top: 0.25rem; }
-        .card-loc { font-size: 0.7rem; margin-top: 0.4rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .card-loc a { color: var(--success); text-decoration: none; }
-        .card-loc a:hover { text-decoration: underline; }
+        #map { flex:1; height:100%; }
 
-        #map { flex: 1; height: 100%; }
+        .marker { background:var(--danger-light); border:2px solid var(--danger); border-radius:4px; padding:1px 5px; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--danger-dark); box-shadow:0 1px 3px rgba(0,0,0,.3); white-space:nowrap; }
+        .marker-ok    { background:#D1FAE5; border-color:var(--success); color:var(--success-dark); opacity:.75; }
+        .marker-inacc { background:var(--inacc-light); border-color:var(--inacc); color:var(--inacc-dark); }
+        .my-position { width:16px; height:16px; background:#3B82F6; border:3px solid #fff; border-radius:50%; box-shadow:0 0 0 4px rgba(59,130,246,.3); animation:glow 2s infinite; }
+        @keyframes glow { 0%,100%{box-shadow:0 0 0 4px rgba(59,130,246,.3)} 50%{box-shadow:0 0 0 8px rgba(59,130,246,.1)} }
 
-        .marker {
-            background: var(--danger-light);
-            border: 2px solid var(--danger);
-            border-radius: 4px;
-            padding: 1px 5px;
-            font-family: var(--mono);
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--danger-dark);
-            box-shadow: 0 1px 3px rgba(0,0,0,.3);
-            white-space: nowrap;
-        }
-        .marker-ok    { background: #D1FAE5; border-color: var(--success); color: var(--success-dark); opacity: 0.75; }
-        .marker-inacc { background: var(--inacc-light); border-color: var(--inacc); color: var(--inacc-dark); }
+        .legend { background:#fff; padding:8px 12px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.2); font-size:.7rem; line-height:1.9; }
+        .legend-row { display:flex; align-items:center; gap:6px; }
 
-        /* Position marker (point bleu pulsant) */
-        .my-position {
-            width: 16px; height: 16px;
-            background: #3B82F6;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(59,130,246,0.3);
-            animation: glow 2s infinite;
-        }
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 0 4px rgba(59,130,246,0.3); }
-            50%       { box-shadow: 0 0 0 8px rgba(59,130,246,0.1); }
-        }
+        .leaflet-popup-content-wrapper { border-radius:8px; }
+        .leaflet-popup-content { margin:0; min-width:280px; }
+        .popup { padding:.8rem; }
+        .popup-title { font-family:var(--mono); font-size:1.2rem; border-bottom:2px solid var(--gray-200); padding-bottom:.5rem; margin-bottom:.6rem; color:var(--primary); display:flex; align-items:center; justify-content:space-between; }
+        .popup-anomalies { background:#FEF2F2; padding:.5rem; border-radius:5px; font-size:.8rem; margin-bottom:.6rem; }
+        .popup-anomalies div { margin-bottom:.2rem; }
+        .popup-anomalies strong { color:var(--danger-dark); }
+        .popup-treated { background:var(--success-light); border:1px solid #6EE7B7; padding:.5rem; border-radius:5px; font-size:.8rem; margin-bottom:.6rem; }
+        .popup-treated strong { color:var(--success-dark); }
+        .popup-inacc { background:var(--inacc-light); border:1px solid #93C5FD; padding:.5rem; border-radius:5px; font-size:.8rem; margin-bottom:.6rem; }
+        .popup-inacc strong { color:var(--inacc-dark); }
+        .popup-loc { background:#F0FDF4; padding:.5rem; border-radius:5px; margin-bottom:.6rem; }
+        .popup-loc a { color:var(--success); text-decoration:none; font-weight:600; font-size:.85rem; display:block; margin-bottom:6px; }
+        .btn-route-popup { background:var(--route); color:#fff; display:block; width:100%; text-align:center; padding:7px; border-radius:5px; font-weight:600; font-size:.82rem; margin-bottom:5px; border:none; cursor:pointer; }
+        .btn-route-popup:hover { background:#6D28D9; }
 
-        .legend { background: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); font-size: 0.7rem; line-height: 1.9; }
-        .legend-row { display: flex; align-items: center; gap: 6px; }
+        .leaflet-control-layers { padding:10px 12px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.25); font-size:.9rem; }
+        .leaflet-control-layers label { margin:6px 0; font-weight:600; }
+        footer { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:.6rem 1.5rem; text-align:center; font-size:.75rem; }
 
-        .leaflet-popup-content-wrapper { border-radius: 8px; }
-        .leaflet-popup-content { margin: 0; min-width: 280px; }
-
-        .popup { padding: 0.8rem; }
-        .popup-title { font-family: var(--mono); font-size: 1.2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0.5rem; margin-bottom: 0.6rem; color: var(--primary); display: flex; align-items: center; justify-content: space-between; }
-        .popup-anomalies { background: #FEF2F2; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
-        .popup-anomalies div { margin-bottom: 0.2rem; }
-        .popup-anomalies strong { color: var(--danger-dark); }
-        .popup-treated { background: var(--success-light); border: 1px solid #6EE7B7; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
-        .popup-treated strong { color: var(--success-dark); }
-        .popup-inacc { background: var(--inacc-light); border: 1px solid #93C5FD; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
-        .popup-inacc strong { color: var(--inacc-dark); }
-        .popup-loc { background: #F0FDF4; padding: 0.5rem; border-radius: 5px; margin-bottom: 0.6rem; }
-        .popup-loc a { color: var(--success); text-decoration: none; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 6px; }
-        .btn-directions {
-            background: #7C3AED;
-            color: #fff;
-            display: block;
-            text-align: center;
-            padding: 7px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.82rem;
-            margin-bottom: 5px;
-        }
-
-        .leaflet-control-layers { padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 0.9rem; }
-        .leaflet-control-layers label { margin: 6px 0; font-weight: 600; }
-
-        footer { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 0.6rem 1.5rem; text-align: center; font-size: 0.75rem; }
-
-        @media (max-width: 700px) {
-            .layout { flex-direction: column; }
-            .sidebar { width: 100%; height: 40%; }
-            .header { flex-wrap: wrap; gap: 10px; }
+        @media (max-width:700px) {
+            .layout { flex-direction:column; }
+            .sidebar { width:100%; height:40%; }
+            .header { flex-wrap:wrap; gap:10px; }
         }
     </style>
 </head>
@@ -296,21 +163,27 @@
     <div class="stat-item"><span class="dot dot-red"></span><span class="stat-num" id="statPending">-</span>&nbsp;En attente</div>
     <div class="stat-item"><span class="dot dot-green"></span><span class="stat-num" id="statTreated">-</span>&nbsp;Traités</div>
     <div class="stat-item"><span class="dot dot-blue"></span><span class="stat-num" id="statInacc">-</span>&nbsp;Inaccessibles</div>
-    <div style="margin-left:auto; font-size:0.7rem; opacity:0.7" id="lastSync"></div>
+    <div style="margin-left:auto; font-size:.7rem; opacity:.7" id="lastSync"></div>
 </div>
 
-<!-- Navigation bar -->
 <div class="nav-bar">
-    <label>🧭 Aller au regard :</label>
+    <label>🧭 Itinéraire vers FID :</label>
     <input class="nav-input" id="navFid" type="number" placeholder="FID" min="1"/>
-    <button class="btn-nav" id="btnNavigate">🗺️ Y aller</button>
-    <span class="nav-status" id="navStatus">Entrez un FID puis cliquez</span>
+    <button class="btn-nav" id="btnNavigate">🗺️ Calculer</button>
+    <button class="btn-clear" id="btnClear">✕ Effacer</button>
+    <span class="nav-status" id="navStatus">Capturez votre position puis entrez un FID</span>
+</div>
+
+<div class="route-info" id="routeInfo">
+    <span>🛣 Distance : <strong id="routeDist">—</strong></span>
+    <span>⏱ Durée : <strong id="routeTime">—</strong></span>
+    <span style="font-size:.7rem; opacity:.7">Calcul OSRM — routes réelles</span>
 </div>
 
 <div class="layout">
     <aside class="sidebar">
         <div class="filter-bar">
-            <button class="filter-btn f-all"  data-filter="all">🗂 Tous</button>
+            <button class="filter-btn f-all" data-filter="all">🗂 Tous</button>
             <button class="filter-btn" data-filter="pending">🔴 En attente</button>
             <button class="filter-btn" data-filter="treated">✅ Traités</button>
             <button class="filter-btn" data-filter="inacc">🔵 Inacc.</button>
@@ -334,61 +207,41 @@
             fidField: 'entry.57826848'
         },
         map: {
-            center: [34.68, -2.0],
-            zoom: 10,
+            center: [34.68, -2.0], zoom: 10,
             osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
         }
     };
 
     const state = {
-        map: null,
-        markers: {},
-        data: [],
+        map: null, markers: {}, data: [],
         interventions: new Map(),
         filter: 'all',
-        myPosition: null,
-        myMarker: null
+        myPosition: null, myMarker: null,
+        routeLayer: null, destMarker: null
     };
 
-    function mapsLink(lat, lon) {
-        return `https://www.google.com/maps?q=${lat},${lon}`;
-    }
+    const $ = id => document.getElementById(id);
 
-    // Google Maps navigation : si on a la position de l'agent, itinéraire complet
-    // sinon ouvre juste la destination
-    function directionsLink(destLat, destLon) {
-        if (state.myPosition) {
-            return `https://www.google.com/maps/dir/${state.myPosition.lat},${state.myPosition.lon}/${destLat},${destLon}`;
-        }
-        return `https://www.google.com/maps/dir//${destLat},${destLon}`;
-    }
+    function mapsLink(lat, lon) { return `https://www.google.com/maps?q=${lat},${lon}`; }
 
     function getCoords(geometry) {
         if (!geometry) return null;
-        if (geometry.type === 'Point') {
-            return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
-        }
+        if (geometry.type === 'Point') return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
         if (geometry.type === 'Polygon') {
             const ring = geometry.coordinates[0];
-            const sum = ring.reduce((a, p) => ({ lon: a.lon + p[0], lat: a.lat + p[1] }), { lon: 0, lat: 0 });
-            return { lat: sum.lat / ring.length, lon: sum.lon / ring.length };
+            const s = ring.reduce((a,p) => ({ lon: a.lon+p[0], lat: a.lat+p[1] }), { lon:0, lat:0 });
+            return { lat: s.lat/ring.length, lon: s.lon/ring.length };
         }
         return null;
     }
 
     function today() { return new Date().toISOString().split('T')[0]; }
+    function fmtDate(str) { if (!str) return ''; const d = new Date(str); return isNaN(d) ? str : d.toLocaleDateString('fr-FR'); }
 
-    function fmtDate(str) {
-        if (!str) return '';
-        const d = new Date(str);
-        return isNaN(d) ? str : d.toLocaleDateString('fr-FR');
-    }
-
-    function isInaccessible(feature) {
-        const p = feature.properties;
-        const a = (p.ANOMALIE_REGARD || '').toLowerCase();
-        const b = (p.ANOMALIE_TAMPON || '').toLowerCase();
+    function isInaccessible(f) {
+        const a = (f.properties.ANOMALIE_REGARD || '').toLowerCase();
+        const b = (f.properties.ANOMALIE_TAMPON || '').toLowerCase();
         return a.includes('inacc') || b.includes('inacc');
     }
 
@@ -396,120 +249,145 @@
         if (feature && isInaccessible(feature)) return 'inacc';
         const i = state.interventions.get(fid);
         if (!i) return 'pending';
-        if (i.isTreated) return 'treated';
-        return 'pending';
+        return i.isTreated ? 'treated' : 'pending';
     }
 
-    // ── GPS POSITION ─────────────────────────────────────────────
+    // ── GPS ──────────────────────────────────────────────────────
     function locateMe() {
-        const btn = document.getElementById('btnGps');
+        const btn = $('btnGps');
         btn.textContent = '⏳ Localisation…';
         btn.disabled = true;
 
         if (!navigator.geolocation) {
-            btn.textContent = '❌ GPS indisponible';
-            btn.disabled = false;
-            return;
+            btn.textContent = '❌ GPS indisponible'; btn.disabled = false; return;
         }
 
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                state.myPosition = { lat, lon };
+        navigator.geolocation.getCurrentPosition(pos => {
+            const { latitude: lat, longitude: lon } = pos.coords;
+            state.myPosition = { lat, lon };
 
-                if (state.myMarker) state.map.removeLayer(state.myMarker);
-                state.myMarker = L.marker([lat, lon], {
-                    icon: L.divIcon({
-                        className: 'my-position',
-                        iconSize: [16, 16],
-                        iconAnchor: [8, 8]
-                    })
-                }).addTo(state.map).bindPopup('📍 Vous êtes ici');
+            if (state.myMarker) state.map.removeLayer(state.myMarker);
+            state.myMarker = L.marker([lat, lon], {
+                icon: L.divIcon({ className: 'my-position', iconSize: [16,16], iconAnchor: [8,8] })
+            }).addTo(state.map).bindPopup('📍 Vous êtes ici');
 
-                state.map.setView([lat, lon], 15);
-
-                btn.textContent = '✅ Position OK';
-                btn.classList.add('active');
-                btn.disabled = false;
-
-                // Mettre à jour le statut nav si un FID est déjà saisi
-                const fid = parseInt(document.getElementById('navFid').value, 10);
-                if (fid) updateNavStatus(fid);
-            },
-            err => {
-                btn.textContent = '❌ Erreur GPS';
-                btn.disabled = false;
-                console.warn('GPS error:', err.message);
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-        );
+            state.map.setView([lat, lon], 14);
+            btn.textContent = '✅ Position OK';
+            btn.classList.add('active');
+            btn.disabled = false;
+            setStatus('✅ Position capturée — entrez un FID et cliquez Calculer', 'ok');
+        }, err => {
+            btn.textContent = '❌ Erreur GPS'; btn.disabled = false;
+            setStatus('❌ GPS impossible : ' + err.message, 'error');
+        }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // ── NAVIGATION VERS UN REGARD ─────────────────────────────────
-    function navigateToFid() {
-        const input = document.getElementById('navFid');
+    // ── ROUTING ──────────────────────────────────────────────────
+    function setStatus(msg, type) {
+        $('navStatus').textContent = msg;
+        $('navStatus').className = 'nav-status' + (type ? ' ' + type : '');
+    }
+
+    function clearRoute() {
+        if (state.routeLayer) { state.map.removeLayer(state.routeLayer); state.routeLayer = null; }
+        if (state.destMarker) { state.map.removeLayer(state.destMarker); state.destMarker = null; }
+        $('routeInfo').classList.remove('on');
+        $('btnClear').style.display = 'none';
+        setStatus('Capturez votre position puis entrez un FID', '');
+    }
+
+    async function drawRoute(fromLat, fromLon, toLat, toLon) {
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('OSRM inaccessible');
+        const data = await resp.json();
+        if (!data.routes?.length) throw new Error('Aucun itinéraire trouvé');
+
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+        if (state.routeLayer) state.map.removeLayer(state.routeLayer);
+        if (state.destMarker) state.map.removeLayer(state.destMarker);
+
+        state.routeLayer = L.polyline(coords, { color: '#7C3AED', weight: 5, opacity: 0.85, lineJoin: 'round' }).addTo(state.map);
+
+        state.destMarker = L.marker([toLat, toLon], {
+            icon: L.divIcon({
+                className: '',
+                html: `<div style="background:#7C3AED;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:22px;height:22px;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>`,
+                iconSize: [22,22], iconAnchor: [11,22]
+            })
+        }).addTo(state.map);
+
+        state.map.fitBounds(state.routeLayer.getBounds(), { padding: [50, 50] });
+
+        const distKm = (route.distance / 1000).toFixed(1);
+        const mins = Math.round(route.duration / 60);
+        const hrs = Math.floor(mins / 60);
+        const rem = mins % 60;
+        $('routeDist').textContent = distKm + ' km';
+        $('routeTime').textContent = hrs > 0 ? `${hrs}h${rem.toString().padStart(2,'0')}` : `${mins} min`;
+        $('routeInfo').classList.add('on');
+        $('btnClear').style.display = 'block';
+    }
+
+    async function navigateToFid() {
+        const input = $('navFid');
         const fid = parseInt(input.value, 10);
-        const statusEl = document.getElementById('navStatus');
 
         if (isNaN(fid)) {
-            input.classList.add('error');
-            setTimeout(() => input.classList.remove('error'), 600);
-            statusEl.textContent = '⚠ Entrez un numéro de FID valide';
-            statusEl.className = 'nav-status error';
-            return;
+            input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 600);
+            setStatus('⚠ Entrez un numéro FID valide', 'error'); return;
+        }
+        if (!state.myPosition) {
+            setStatus('⚠ Capturez d\'abord votre position GPS', 'error'); return;
         }
 
         const feature = state.data.find(f => f.properties.fid_terrain === fid);
         if (!feature) {
-            input.classList.add('error');
-            setTimeout(() => input.classList.remove('error'), 600);
-            statusEl.textContent = `❌ FID ${fid} introuvable dans les données`;
-            statusEl.className = 'nav-status error';
-            return;
+            input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 600);
+            setStatus(`❌ FID ${fid} introuvable`, 'error'); return;
         }
 
         const coords = getCoords(feature.geometry);
-        if (!coords) {
-            statusEl.textContent = '❌ Coordonnées manquantes pour ce regard';
-            statusEl.className = 'nav-status error';
-            return;
-        }
+        if (!coords) { setStatus('❌ Coordonnées manquantes', 'error'); return; }
 
-        // Ouvrir Google Maps avec itinéraire
-        window.open(directionsLink(coords.lat, coords.lon), '_blank');
+        setStatus('⏳ Calcul de l\'itinéraire via OSRM…', 'loading');
+        $('btnNavigate').disabled = true;
 
-        statusEl.textContent = `✅ Itinéraire vers #${fid} ouvert dans Google Maps`;
-        statusEl.className = 'nav-status ok';
-
-        // Zoomer sur le regard dans la carte aussi
-        selectRecord(fid);
-    }
-
-    function updateNavStatus(fid) {
-        const feature = state.data.find(f => f.properties.fid_terrain === fid);
-        if (!feature) return;
-        const coords = getCoords(feature.geometry);
-        if (!coords) return;
-        const statusEl = document.getElementById('navStatus');
-        if (state.myPosition) {
-            statusEl.textContent = `📍 Position détectée · Regard #${fid} prêt`;
-            statusEl.className = 'nav-status ok';
+        try {
+            await drawRoute(state.myPosition.lat, state.myPosition.lon, coords.lat, coords.lon);
+            setStatus(`✅ Itinéraire vers Regard #${fid} affiché`, 'ok');
+            selectRecord(fid);
+        } catch(e) {
+            setStatus('❌ ' + e.message, 'error');
+        } finally {
+            $('btnNavigate').disabled = false;
         }
     }
 
-    // ── CSV ───────────────────────────────────────────────────────
+    // Depuis le popup
+    window.routeToRegard = async function(lat, lon, fid) {
+        if (!state.myPosition) {
+            alert('Capturez d\'abord votre position via le bouton "Ma position"'); return;
+        }
+        $('navFid').value = fid;
+        setStatus('⏳ Calcul de l\'itinéraire…', 'loading');
+        try {
+            await drawRoute(state.myPosition.lat, state.myPosition.lon, lat, lon);
+            setStatus(`✅ Itinéraire vers #${fid} affiché`, 'ok');
+        } catch(e) { setStatus('❌ ' + e.message, 'error'); }
+    };
+
+    // ── CSV ──────────────────────────────────────────────────────
     function splitCSVLine(line) {
-        const result = [];
-        let cur = '';
-        let inQ = false;
+        const r = []; let cur = ''; let inQ = false;
         for (const ch of line) {
             if (ch === '"') { inQ = !inQ; continue; }
-            if (ch === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+            if (ch === ',' && !inQ) { r.push(cur); cur = ''; continue; }
             cur += ch;
         }
-        result.push(cur);
-        return result;
+        r.push(cur); return r;
     }
 
     function parseCSV(text) {
@@ -532,27 +410,18 @@
             if (!resp.ok) throw new Error('inaccessible');
             const rows = parseCSV(await resp.text());
 
-            console.log('[DEBUG] Headers CSV:', rows.length > 0 ? Object.keys(rows[0]) : 'vide');
-            console.log('[DEBUG] Première ligne:', rows[0]);
+            console.log('[DEBUG] Headers:', rows[0] ? Object.keys(rows[0]) : 'vide');
 
             rows.forEach(row => {
-                const fidRaw = row['fid du regard'] || row['fid_terrain'] || row['fid'] || '';
-                const fid = parseInt(fidRaw, 10);
+                const fid = parseInt(row['fid du regard'] || row['fid_terrain'] || row['fid'] || '', 10);
                 if (isNaN(fid)) return;
-
-                const statusRaw = row['état de l\'intervention']
-                    || row['etat de l\'intervention']
-                    || row['état intervention']
-                    || row['etat'] || row['statut'] || '';
-
+                const statusRaw = row['état de l\'intervention'] || row['etat de l\'intervention'] || row['état intervention'] || row['etat'] || row['statut'] || '';
                 const isTreated = statusRaw.toLowerCase().includes('trait');
                 const ts = new Date(row['horodateur'] || 0).getTime();
-                const existing = state.interventions.get(fid);
-
-                if (!existing || ts >= existing._ts) {
+                const ex = state.interventions.get(fid);
+                if (!ex || ts >= ex._ts) {
                     state.interventions.set(fid, {
-                        isTreated,
-                        status: statusRaw,
+                        isTreated, status: statusRaw,
                         date: row['date intervention'] || '',
                         comment: row['commentaire'] || '',
                         agent: row['nom et prénom'] || row['nom'] || '',
@@ -561,40 +430,34 @@
                 }
             });
 
-            const now = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('syncStatus').innerHTML = `<span class="pulse"></span> Synchro ${now}`;
-            document.getElementById('lastSync').textContent = `Synchro : ${now}`;
-
+            const now = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+            $('syncStatus').innerHTML = `<span class="pulse"></span> Synchro ${now}`;
+            $('lastSync').textContent = `Synchro : ${now}`;
         } catch(e) {
-            console.warn('[CSV] Erreur:', e.message);
-            document.getElementById('syncStatus').innerHTML = `<span style="color:#FCA5A5">⚠ Erreur synchro</span>`;
+            console.warn('[CSV]', e.message);
+            $('syncStatus').innerHTML = `<span style="color:#FCA5A5">⚠ Erreur synchro</span>`;
         }
     }
 
     window.copyLink = function(lat, lon, btn) {
         navigator.clipboard.writeText(mapsLink(lat, lon)).then(() => {
-            const orig = btn.textContent;
-            btn.textContent = '✓ Copié!';
-            btn.classList.add('copied');
+            const orig = btn.textContent; btn.textContent = '✓ Copié!'; btn.classList.add('copied');
             setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
         });
     };
 
     function exportExcel() {
         const rows = state.data.map(f => {
-            const p = f.properties;
-            const coords = getCoords(f.geometry);
+            const p = f.properties, coords = getCoords(f.geometry);
             const interv = state.interventions.get(p.fid_terrain);
             const status = getStatus(p.fid_terrain, f);
             const anomalie = [
-                p.ANOMALIE_REGARD ? 'Regard: ' + p.ANOMALIE_REGARD : '',
-                p.ANOMALIE_TAMPON ? 'Tampon: ' + p.ANOMALIE_TAMPON : '',
-                p[' DESCRIPTION_ANOMALIE'] ? 'Desc: ' + p[' DESCRIPTION_ANOMALIE'] : ''
+                p.ANOMALIE_REGARD ? 'Regard: '+p.ANOMALIE_REGARD : '',
+                p.ANOMALIE_TAMPON ? 'Tampon: '+p.ANOMALIE_TAMPON : '',
+                p[' DESCRIPTION_ANOMALIE'] ? 'Desc: '+p[' DESCRIPTION_ANOMALIE'] : ''
             ].filter(Boolean).join(' | ');
-
             return {
-                fid_terrain: p.fid_terrain,
-                anomalie,
+                fid_terrain: p.fid_terrain, anomalie,
                 statut: status === 'treated' ? 'Traité' : status === 'inacc' ? 'Inaccessible' : 'En attente',
                 date_intervention: interv ? interv.date : '',
                 commentaire: interv ? interv.comment : '',
@@ -602,23 +465,22 @@
                 lien_google_maps: coords ? mapsLink(coords.lat, coords.lon) : ''
             };
         });
-
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Regards');
-        ws['!cols'] = [{ wch: 15 }, { wch: 60 }, { wch: 14 }, { wch: 18 }, { wch: 40 }, { wch: 25 }, { wch: 50 }];
+        ws['!cols'] = [{wch:15},{wch:60},{wch:14},{wch:18},{wch:40},{wch:25},{wch:50}];
         XLSX.writeFile(wb, `regards_${today()}.xlsx`);
     }
 
-    // ── MAP ───────────────────────────────────────────────────────
+    // ── MAP ──────────────────────────────────────────────────────
     function initMap() {
         state.map = L.map('map').setView(CONFIG.map.center, CONFIG.map.zoom);
-        const osm = L.tileLayer(CONFIG.map.osm, { attribution: '© OpenStreetMap' });
-        const sat = L.tileLayer(CONFIG.map.satellite, { attribution: '© Esri' });
+        const osm = L.tileLayer(CONFIG.map.osm, { attribution:'© OpenStreetMap' });
+        const sat = L.tileLayer(CONFIG.map.satellite, { attribution:'© Esri' });
         osm.addTo(state.map);
-        L.control.layers({ 'OpenStreetMap': osm, 'Satellite': sat }, null, { collapsed: false, position: 'topright' }).addTo(state.map);
+        L.control.layers({'OpenStreetMap':osm,'Satellite':sat}, null, { collapsed:false, position:'topright' }).addTo(state.map);
 
-        const legend = L.control({ position: 'bottomleft' });
+        const legend = L.control({ position:'bottomleft' });
         legend.onAdd = () => {
             const div = L.DomUtil.create('div', 'legend');
             div.innerHTML = `
@@ -626,7 +488,8 @@
                 <div class="legend-row"><span class="marker" style="display:inline-block">123</span>&nbsp;En attente</div>
                 <div class="legend-row" style="margin-top:4px"><span class="marker marker-ok" style="display:inline-block">123</span>&nbsp;Traité ✅</div>
                 <div class="legend-row" style="margin-top:4px"><span class="marker marker-inacc" style="display:inline-block">123</span>&nbsp;Inaccessible 🔵</div>
-                <div class="legend-row" style="margin-top:4px"><span class="my-position" style="display:inline-block; border-radius:50%"></span>&nbsp;Ma position</div>
+                <div class="legend-row" style="margin-top:4px"><span class="my-position" style="display:inline-block;border-radius:50%"></span>&nbsp;Ma position</div>
+                <div class="legend-row" style="margin-top:4px"><span style="display:inline-block;width:30px;height:4px;background:#7C3AED;border-radius:2px"></span>&nbsp;Itinéraire</div>
             `;
             return div;
         };
@@ -636,89 +499,66 @@
     function renderMarkers() {
         Object.values(state.markers).forEach(m => state.map.removeLayer(m));
         state.markers = {};
-
         state.data.forEach(f => {
             const coords = getCoords(f.geometry);
             if (!coords) return;
             const fid = f.properties.fid_terrain;
             const status = getStatus(fid, f);
-
-            const cls = status === 'treated' ? 'marker marker-ok'
-                      : status === 'inacc'   ? 'marker marker-inacc'
-                      : 'marker';
-
-            const icon = L.divIcon({ className: cls, html: String(fid), iconSize: null });
-            state.markers[fid] = L.marker([coords.lat, coords.lon], { icon })
-                .addTo(state.map)
-                .on('click', () => selectRecord(fid));
+            const cls = status === 'treated' ? 'marker marker-ok' : status === 'inacc' ? 'marker marker-inacc' : 'marker';
+            state.markers[fid] = L.marker([coords.lat, coords.lon], { icon: L.divIcon({ className: cls, html: String(fid), iconSize: null }) })
+                .addTo(state.map).on('click', () => selectRecord(fid));
         });
     }
 
     function fitBounds() {
-        const pts = state.data.map(f => getCoords(f.geometry)).filter(Boolean).map(c => [c.lat, c.lon]);
-        if (pts.length) state.map.fitBounds(pts, { padding: [30, 30] });
+        const pts = state.data.map(f => getCoords(f.geometry)).filter(Boolean).map(c => [c.lat,c.lon]);
+        if (pts.length) state.map.fitBounds(pts, { padding:[30,30] });
     }
 
     function filteredData() {
-        if (state.filter === 'treated') return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'treated');
-        if (state.filter === 'pending')  return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'pending');
-        if (state.filter === 'inacc')    return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'inacc');
+        if (state.filter === 'treated') return state.data.filter(f => getStatus(f.properties.fid_terrain,f) === 'treated');
+        if (state.filter === 'pending')  return state.data.filter(f => getStatus(f.properties.fid_terrain,f) === 'pending');
+        if (state.filter === 'inacc')    return state.data.filter(f => getStatus(f.properties.fid_terrain,f) === 'inacc');
         return state.data;
     }
 
     function updateStats() {
-        document.getElementById('count').textContent = state.data.length;
-        const treated = state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'treated').length;
-        const inacc   = state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'inacc').length;
-        document.getElementById('statTreated').textContent = treated;
-        document.getElementById('statInacc').textContent   = inacc;
-        document.getElementById('statPending').textContent = state.data.length - treated - inacc;
+        $('count').textContent = state.data.length;
+        const treated = state.data.filter(f => getStatus(f.properties.fid_terrain,f) === 'treated').length;
+        const inacc   = state.data.filter(f => getStatus(f.properties.fid_terrain,f) === 'inacc').length;
+        $('statTreated').textContent = treated;
+        $('statInacc').textContent   = inacc;
+        $('statPending').textContent = state.data.length - treated - inacc;
     }
 
     function cardHTML(f) {
-        const p = f.properties;
-        const coords = getCoords(f.geometry);
+        const p = f.properties, coords = getCoords(f.geometry);
         const url = coords ? mapsLink(coords.lat, coords.lon) : '#';
         const interv = state.interventions.get(p.fid_terrain);
         const status = getStatus(p.fid_terrain, f);
-
         const badge = status === 'treated' ? `<span class="badge badge-treated">✅ Traité</span>`
                     : status === 'inacc'   ? `<span class="badge badge-inacc">🔵 Inaccessible</span>`
                     : `<span class="badge badge-pending">⏳ En attente</span>`;
-
         const cls = status === 'treated' ? 'treated' : status === 'inacc' ? 'inacc' : '';
-
-        const intervLine = interv && interv.isTreated ? `
-            <div class="card-interv">
-                📅 ${interv.date ? fmtDate(interv.date) : '—'}
-                ${interv.comment ? ' · ' + interv.comment : ''}
-                ${interv.agent   ? ' · 👤 ' + interv.agent : ''}
-            </div>` : '';
-
+        const intervLine = interv && interv.isTreated ? `<div class="card-interv">📅 ${interv.date ? fmtDate(interv.date) : '—'}${interv.comment ? ' · '+interv.comment : ''}${interv.agent ? ' · 👤 '+interv.agent : ''}</div>` : '';
         return `
             <div class="card ${cls}" data-fid="${p.fid_terrain}">
-                <div class="card-head">
-                    <div class="card-fid">#${p.fid_terrain}</div>
-                    ${badge}
-                </div>
+                <div class="card-head"><div class="card-fid">#${p.fid_terrain}</div>${badge}</div>
                 ${p.ANOMALIE_REGARD  ? `<div class="card-anomalie">🔴 Regard: ${p.ANOMALIE_REGARD}</div>` : ''}
                 ${p.ANOMALIE_TAMPON  ? `<div class="card-anomalie">🔴 Tampon: ${p.ANOMALIE_TAMPON}</div>` : ''}
                 ${p[' DESCRIPTION_ANOMALIE'] ? `<div class="card-anomalie">📝 ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
                 ${intervLine}
                 <div class="card-loc">
                     📍 <a href="${url}" target="_blank">Google Maps</a>
-                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation(); copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>` : ''}
+                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation();copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>` : ''}
                 </div>
             </div>`;
     }
 
     function renderList() {
         const data = filteredData();
-        const el = document.getElementById('sidebar');
-        el.innerHTML = data.length
-            ? data.map(cardHTML).join('')
-            : `<div style="padding:1.5rem; text-align:center; color:var(--gray-400); font-size:0.85rem;">Aucun regard pour ce filtre.</div>`;
-
+        const el = $('sidebar');
+        el.innerHTML = data.length ? data.map(cardHTML).join('') : `<div style="padding:1.5rem;text-align:center;color:var(--gray-400);font-size:.85rem;">Aucun regard pour ce filtre.</div>`;
         el.querySelectorAll('.card').forEach(card => {
             card.addEventListener('click', e => {
                 if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
@@ -728,19 +568,14 @@
     }
 
     function popupHTML(f) {
-        const p = f.properties;
-        const coords = getCoords(f.geometry);
+        const p = f.properties, coords = getCoords(f.geometry);
         const url = mapsLink(coords.lat, coords.lon);
         const formUrl = CONFIG.googleForm.url + '&' + CONFIG.googleForm.fidField + '=' + p.fid_terrain;
         const interv = state.interventions.get(p.fid_terrain);
         const status = getStatus(p.fid_terrain, f);
-
         const badge = status === 'treated' ? `<span class="badge badge-treated">✅ Traité</span>`
                     : status === 'inacc'   ? `<span class="badge badge-inacc">🔵 Inaccessible</span>`
                     : `<span class="badge badge-pending">⏳ En attente</span>`;
-
-        const navUrl = directionsLink(coords.lat, coords.lon);
-
         return `
             <div class="popup">
                 <div class="popup-title">Regard #${p.fid_terrain} ${badge}</div>
@@ -750,23 +585,21 @@
                         ${p.ANOMALIE_TAMPON ? `<div><strong>Anomalie Tampon:</strong> ${p.ANOMALIE_TAMPON}</div>` : ''}
                         ${p[' DESCRIPTION_ANOMALIE'] ? `<div><strong>Description:</strong> ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
                     </div>` : ''}
-                ${status === 'inacc' ? `
-                    <div class="popup-inacc">🔵 <strong>Regard Inaccessible</strong></div>` : ''}
+                ${status === 'inacc' ? `<div class="popup-inacc">🔵 <strong>Regard Inaccessible</strong></div>` : ''}
                 ${interv && interv.isTreated ? `
-                    <div class="popup-treated">
-                        ✅ <strong>Intervention effectuée</strong><br>
-                        ${interv.date    ? '📅 ' + fmtDate(interv.date) + '<br>' : ''}
-                        ${interv.comment ? '💬 ' + interv.comment + '<br>' : ''}
-                        ${interv.agent   ? '👤 ' + interv.agent : ''}
+                    <div class="popup-treated">✅ <strong>Intervention effectuée</strong><br>
+                        ${interv.date ? '📅 '+fmtDate(interv.date)+'<br>' : ''}
+                        ${interv.comment ? '💬 '+interv.comment+'<br>' : ''}
+                        ${interv.agent ? '👤 '+interv.agent : ''}
                     </div>` : ''}
                 <div class="popup-loc">
                     <a href="${url}" target="_blank">📍 Voir sur Google Maps</a>
-                    <a href="${navUrl}" target="_blank" class="btn-directions">
-                        🧭 ${state.myPosition ? 'Itinéraire depuis ma position' : 'Y aller (Google Maps)'}
-                    </a>
+                    <button class="btn-route-popup" onclick="routeToRegard(${coords.lat},${coords.lon},${p.fid_terrain})">
+                        🗺️ Voir l'itinéraire sur la carte
+                    </button>
                     <button class="btn btn-copy-lg" onclick="copyLink(${coords.lat},${coords.lon},this)">📋 Copier lien WhatsApp</button>
                 </div>
-                <a href="${formUrl}" target="_blank" class="btn" style="margin-top:0.5rem">📝 Signaler intervention</a>
+                <a href="${formUrl}" target="_blank" class="btn" style="margin-top:.5rem">📝 Signaler intervention</a>
             </div>`;
     }
 
@@ -774,11 +607,9 @@
         const f = state.data.find(x => x.properties.fid_terrain === fid);
         if (!f) return;
         const coords = getCoords(f.geometry);
-
         document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
         const card = document.querySelector(`.card[data-fid="${fid}"]`);
-        if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-
+        if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
         state.map.setView([coords.lat, coords.lon], 17);
         state.markers[fid]?.bindPopup(popupHTML(f)).openPopup();
     }
@@ -794,7 +625,7 @@
             });
             return true;
         } catch(e) {
-            document.getElementById('sidebar').innerHTML = `<div style="padding:1rem; color:var(--danger)"><strong>Erreur:</strong> ${e.message}</div>`;
+            $('sidebar').innerHTML = `<div style="padding:1rem;color:var(--danger)"><strong>Erreur:</strong> ${e.message}</div>`;
             return false;
         }
     }
@@ -805,17 +636,16 @@
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 state.filter = btn.dataset.filter;
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('f-all', 'f-pending', 'f-treated', 'f-inacc'));
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('f-all','f-pending','f-treated','f-inacc'));
                 btn.classList.add('f-' + state.filter);
                 renderList();
             });
         });
 
-        document.getElementById('btnGps').addEventListener('click', locateMe);
-        document.getElementById('btnNavigate').addEventListener('click', navigateToFid);
-        document.getElementById('navFid').addEventListener('keydown', e => {
-            if (e.key === 'Enter') navigateToFid();
-        });
+        $('btnGps').addEventListener('click', locateMe);
+        $('btnNavigate').addEventListener('click', navigateToFid);
+        $('btnClear').addEventListener('click', clearRoute);
+        $('navFid').addEventListener('keydown', e => { if (e.key === 'Enter') navigateToFid(); });
 
         const [ok] = await Promise.all([loadGeoJSON(), loadInterventions()]);
         if (!ok) return;
@@ -825,18 +655,15 @@
         renderMarkers();
         fitBounds();
 
-        document.getElementById('btnExport').addEventListener('click', exportExcel);
+        $('btnExport').addEventListener('click', exportExcel);
 
         setInterval(async () => {
             await loadInterventions();
-            updateStats();
-            renderList();
-            renderMarkers();
+            updateStats(); renderList(); renderMarkers();
         }, 5 * 60 * 1000);
     }
 
     document.addEventListener('DOMContentLoaded', init);
-
 })();
 </script>
 </body>
