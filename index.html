@@ -19,6 +19,9 @@
             --success-dark: #065F46;
             --warning: #F59E0B;
             --warning-dark: #D97706;
+            --orange: #EA580C;
+            --orange-light: #FFF7ED;
+            --orange-dark: #9A3412;
             --gray-50: #F8FAFC;
             --gray-200: #E2E8F0;
             --gray-400: #94A3B8;
@@ -32,79 +35,85 @@
         .header {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        .header h1 { font-size: 1.1rem; }
-        .header small { opacity: 0.85; font-size: 0.75rem; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .big-count { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+        .header h1 { font-size: 1rem; }
+        .header small { opacity: 0.85; font-size: 0.72rem; }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .big-count { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; }
 
         .stats-bar {
             background: #1E3A8A;
-            padding: 0.4rem 1.5rem;
+            padding: 0.35rem 1.2rem;
             display: flex;
             align-items: center;
-            gap: 1.5rem;
-            font-size: 0.78rem;
+            gap: 1.2rem;
+            font-size: 0.75rem;
             color: #fff;
             flex-wrap: wrap;
         }
-        .stat-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .dot-red { background: #EF4444; }
-        .dot-green { background: #10B981; }
-        .stat-num { font-family: var(--mono); font-weight: 700; font-size: 0.9rem; }
+        .stat-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .dot-red    { background: #EF4444; }
+        .dot-green  { background: #10B981; }
+        .dot-orange { background: #F97316; }
+        .stat-num { font-family: var(--mono); font-weight: 700; font-size: 0.88rem; }
 
-        .sync-badge { font-size: 0.68rem; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
-        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #86EFAC; animation: blink 2s infinite; }
+        .sync-badge { font-size: 0.66rem; opacity: 0.85; display: flex; align-items: center; gap: 4px; }
+        .pulse { width: 7px; height: 7px; border-radius: 50%; background: #86EFAC; animation: blink 2s infinite; flex-shrink: 0; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .btn {
-            display: block;
+            display: inline-block;
             background: var(--primary);
             color: #fff;
             text-align: center;
-            padding: 0.6rem;
-            border-radius: 5px;
+            padding: 0.55rem 0.9rem;
+            border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             border: none;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
-        .btn:hover { background: var(--primary-dark); }
-        .btn-export { background: var(--success); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 6px; }
-        .btn-export:hover { background: #059669; }
-        .btn-copy { background: var(--warning); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-export  { background: var(--success); }
+        .btn-itinery { background: #7C3AED; display: flex; align-items: center; gap: 5px; }
+        .btn-nav     { background: #0EA5E9; padding: 4px 10px; font-size: 0.7rem; border-radius: 4px; }
+        .btn-nav-lg  { background: #0EA5E9; width: 100%; padding: 7px; font-size: 0.82rem; margin-top: 6px; }
+        .btn-copy    { background: var(--warning); padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; }
         .btn-copy:hover { background: var(--warning-dark); }
         .btn-copy.copied { background: var(--success); }
         .btn-copy-lg { background: var(--warning); padding: 6px 12px; border-radius: 5px; font-size: 0.8rem; width: 100%; }
-        .btn-copy-lg:hover { background: var(--warning-dark); }
 
-        .filter-bar { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0.5rem; display: flex; gap: 6px; }
+        .filter-bar { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0.45rem 0.5rem; display: flex; gap: 5px; }
         .filter-btn {
             flex: 1;
-            padding: 5px 8px;
+            padding: 5px 4px;
             border-radius: 6px;
             border: 2px solid var(--gray-200);
             background: #fff;
             font-family: var(--sans);
             font-weight: 600;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             cursor: pointer;
             transition: all 0.15s;
             text-align: center;
         }
-        .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-        .f-all     { background: #EFF6FF; border-color: var(--primary); color: var(--primary); }
-        .f-pending { background: #FEF2F2; border-color: var(--danger); color: var(--danger-dark); }
-        .f-treated { background: var(--success-light); border-color: var(--success); color: var(--success-dark); }
+        .filter-btn:hover { transform: translateY(-1px); }
+        .f-all        { background: #EFF6FF; border-color: var(--primary); color: var(--primary); }
+        .f-pending    { background: #FEF2F2; border-color: var(--danger); color: var(--danger-dark); }
+        .f-treated    { background: var(--success-light); border-color: var(--success); color: var(--success-dark); }
+        .f-inacc      { background: var(--orange-light); border-color: var(--orange); color: var(--orange-dark); }
 
-        .layout { display: flex; height: calc(100vh - 135px); }
+        .layout { display: flex; height: calc(100vh - 130px); }
 
         .sidebar { width: 320px; background: var(--gray-50); border-right: 1px solid var(--gray-200); display: flex; flex-direction: column; }
         .sidebar-list { overflow-y: auto; flex: 1; padding: 0.5rem; }
@@ -114,31 +123,35 @@
             border: 2px solid var(--gray-200);
             border-left: 4px solid var(--danger);
             border-radius: 8px;
-            padding: 0.7rem;
-            margin-bottom: 0.5rem;
+            padding: 0.65rem;
+            margin-bottom: 0.45rem;
             cursor: pointer;
             transition: all 0.2s;
         }
         .card:hover { border-color: #3B82F6; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
-        .card.selected { background: #EFF6FF; border-color: var(--primary); }
-        .card.treated { border-left-color: var(--success); opacity: 0.82; }
-        .card.treated:hover { opacity: 1; }
+        .card.selected  { background: #EFF6FF; border-color: var(--primary); }
+        .card.treated   { border-left-color: var(--success); opacity: 0.82; }
+        .card.inacc     { border-left-color: var(--orange); background: #FFFBF5; }
+        .card.treated:hover, .card.inacc:hover { opacity: 1; }
 
-        .card-head { display: flex; align-items: center; justify-content: space-between; }
-        .card-fid { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .card-fid { font-family: var(--mono); font-size: 0.95rem; font-weight: 700; color: var(--primary); }
 
-        .badge { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge { font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
         .badge-pending { background: var(--danger-light); color: var(--danger-dark); }
         .badge-treated { background: var(--success-light); color: var(--success-dark); }
+        .badge-inacc   { background: var(--orange-light); color: var(--orange-dark); }
 
-        .card-anomalie { font-size: 0.73rem; color: var(--danger); margin-top: 0.3rem; font-weight: 600; }
-        .card-interv { font-size: 0.71rem; color: var(--success-dark); margin-top: 0.25rem; }
-        .card-loc { font-size: 0.7rem; margin-top: 0.4rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .card-anomalie { font-size: 0.71rem; color: var(--danger); margin-top: 0.28rem; font-weight: 600; }
+        .card-interv   { font-size: 0.69rem; color: var(--success-dark); margin-top: 0.22rem; }
+        .card-inacc-info { font-size: 0.69rem; color: var(--orange-dark); margin-top: 0.22rem; }
+        .card-loc { font-size: 0.68rem; margin-top: 0.38rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .card-loc a { color: var(--success); text-decoration: none; }
         .card-loc a:hover { text-decoration: underline; }
 
         #map { flex: 1; height: 100%; }
 
+        /* === MARKERS === */
         .marker {
             background: var(--danger-light);
             border: 2px solid var(--danger);
@@ -151,33 +164,76 @@
             box-shadow: 0 1px 3px rgba(0,0,0,.3);
             white-space: nowrap;
         }
-        .marker-ok { background: #D1FAE5; border-color: var(--success); color: var(--success-dark); opacity: 0.75; }
+        .marker-ok   { background: #D1FAE5; border-color: var(--success); color: var(--success-dark); opacity: 0.8; }
+        .marker-inacc { background: #FFEDD5; border-color: var(--orange); color: var(--orange-dark); }
+        .marker-me {
+            background: #7C3AED;
+            border: 2px solid #5B21B6;
+            border-radius: 50%;
+            width: 14px; height: 14px;
+            box-shadow: 0 0 0 4px rgba(124,58,237,0.25);
+        }
 
-        .legend { background: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); font-size: 0.7rem; line-height: 1.9; }
+        .legend { background: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,.2); font-size: 0.68rem; line-height: 2; }
         .legend-row { display: flex; align-items: center; gap: 6px; }
 
         .leaflet-popup-content-wrapper { border-radius: 8px; }
         .leaflet-popup-content { margin: 0; min-width: 280px; }
 
         .popup { padding: 0.8rem; }
-        .popup-title { font-family: var(--mono); font-size: 1.2rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0.5rem; margin-bottom: 0.6rem; color: var(--primary); display: flex; align-items: center; justify-content: space-between; }
-        .popup-anomalies { background: #FEF2F2; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
+        .popup-title { font-family: var(--mono); font-size: 1.1rem; border-bottom: 2px solid var(--gray-200); padding-bottom: 0.45rem; margin-bottom: 0.55rem; color: var(--primary); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .popup-anomalies { background: #FEF2F2; padding: 0.5rem; border-radius: 5px; font-size: 0.78rem; margin-bottom: 0.55rem; }
         .popup-anomalies div { margin-bottom: 0.2rem; }
         .popup-anomalies strong { color: var(--danger-dark); }
-        .popup-treated { background: var(--success-light); border: 1px solid #6EE7B7; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-bottom: 0.6rem; }
-        .popup-treated strong { color: var(--success-dark); }
-        .popup-loc { background: #F0FDF4; padding: 0.5rem; border-radius: 5px; margin-bottom: 0.6rem; }
-        .popup-loc a { color: var(--success); text-decoration: none; font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 6px; }
+        .popup-treated { background: var(--success-light); border: 1px solid #6EE7B7; padding: 0.5rem; border-radius: 5px; font-size: 0.78rem; margin-bottom: 0.55rem; }
+        .popup-inacc   { background: var(--orange-light); border: 1px solid #FDBA74; padding: 0.5rem; border-radius: 5px; font-size: 0.78rem; margin-bottom: 0.55rem; }
+        .popup-loc { background: #F0FDF4; padding: 0.5rem; border-radius: 5px; margin-bottom: 0.55rem; }
+        .popup-loc a { color: var(--success); text-decoration: none; font-weight: 600; font-size: 0.82rem; display: block; margin-bottom: 5px; }
 
-        .leaflet-control-layers { padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 0.9rem; }
-        .leaflet-control-layers label { margin: 6px 0; font-weight: 600; }
+        /* Itinerary modal */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.2rem;
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal h2 { font-size: 1rem; color: var(--primary); margin-bottom: 0.8rem; }
+        .modal-stops { margin: 0.8rem 0; }
+        .modal-stop {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: var(--gray-50);
+            margin-bottom: 0.4rem;
+            font-size: 0.8rem;
+        }
+        .stop-num { font-family: var(--mono); font-weight: 700; color: var(--primary); min-width: 28px; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 1rem; }
+        .modal-actions .btn { flex: 1; padding: 0.6rem; font-size: 0.82rem; }
+        .btn-close { background: var(--gray-200); color: #374151; }
 
-        footer { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 0.6rem 1.5rem; text-align: center; font-size: 0.75rem; }
+        .gps-loading { font-size: 0.8rem; color: var(--gray-400); padding: 1rem; text-align: center; }
+
+        .leaflet-control-layers { padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.25); font-size: 0.88rem; }
+        .leaflet-control-layers label { margin: 5px 0; font-weight: 600; }
+
+        footer { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 0.5rem 1.2rem; text-align: center; font-size: 0.72rem; }
 
         @media (max-width: 700px) {
             .layout { flex-direction: column; }
-            .sidebar { width: 100%; height: 40%; }
-            .header { flex-wrap: wrap; gap: 10px; }
+            .sidebar { width: 100%; height: 42%; }
+            .header { flex-wrap: wrap; gap: 8px; }
         }
     </style>
 </head>
@@ -185,12 +241,13 @@
 
 <header class="header">
     <div>
-        <h1>💧 SRM Oriental ANOMALIES</h1>
-        <small>Réseau AEP - Regards à traiter</small>
+        <h1>💧 SRM Oriental — Regards</h1>
+        <small>Réseau AEP · Suivi terrain</small>
     </div>
     <div class="header-right">
         <div class="sync-badge" id="syncStatus"><span class="pulse"></span><span>Chargement…</span></div>
-        <button class="btn btn-export" id="btnExport">📥 Exporter Excel</button>
+        <button class="btn btn-itinery" id="btnItinerary">🗺️ Plan du jour</button>
+        <button class="btn btn-export" id="btnExport">📥 Excel</button>
         <div style="text-align:right">
             <div class="big-count" id="count">-</div>
             <small>regards</small>
@@ -201,15 +258,17 @@
 <div class="stats-bar">
     <div class="stat-item"><span class="dot dot-red"></span><span class="stat-num" id="statPending">-</span>&nbsp;En attente</div>
     <div class="stat-item"><span class="dot dot-green"></span><span class="stat-num" id="statTreated">-</span>&nbsp;Traités</div>
-    <div style="margin-left:auto; font-size:0.7rem; opacity:0.7" id="lastSync"></div>
+    <div class="stat-item"><span class="dot dot-orange"></span><span class="stat-num" id="statInacc">-</span>&nbsp;Inaccessibles</div>
+    <div style="margin-left:auto; font-size:0.68rem; opacity:0.7" id="lastSync"></div>
 </div>
 
 <div class="layout">
     <aside class="sidebar">
         <div class="filter-bar">
-            <button class="filter-btn f-all" data-filter="all">🗂 Tous</button>
-            <button class="filter-btn" data-filter="pending">🔴 En attente</button>
+            <button class="filter-btn f-all"  data-filter="all">🗂 Tous</button>
+            <button class="filter-btn" data-filter="pending">🔴 Attente</button>
             <button class="filter-btn" data-filter="treated">✅ Traités</button>
+            <button class="filter-btn" data-filter="inacc">🟠 Inacc.</button>
         </div>
         <div class="sidebar-list" id="sidebar"></div>
     </aside>
@@ -217,6 +276,18 @@
 </div>
 
 <footer>© 2026 ETAFAT. Tous droits réservés.</footer>
+
+<!-- Itinerary Modal -->
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+    <div class="modal">
+        <h2>🗺️ Plan du jour — Itinéraire</h2>
+        <div id="modalContent"></div>
+        <div class="modal-actions">
+            <button class="btn btn-close" id="btnCloseModal">Fermer</button>
+            <button class="btn btn-itinery" id="btnOpenGmaps">Ouvrir dans Maps</button>
+        </div>
+    </div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -240,31 +311,34 @@
     const state = {
         map: null,
         markers: {},
+        myMarker: null,
+        myPosition: null,
         data: [],
         interventions: new Map(),
-        filter: 'all'
+        filter: 'all',
+        itineraryUrl: null
     };
 
     function mapsLink(lat, lon) {
         return `https://www.google.com/maps?q=${lat},${lon}`;
     }
 
+    function mapsNavLink(lat, lon) {
+        return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
+    }
+
     function getCoords(geometry) {
         if (!geometry) return null;
-        if (geometry.type === 'Point') {
-            return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
-        }
+        if (geometry.type === 'Point') return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
         if (geometry.type === 'Polygon') {
             const ring = geometry.coordinates[0];
-            const sum = ring.reduce((a, p) => ({ lon: a.lon + p[0], lat: a.lat + p[1] }), { lon: 0, lat: 0 });
-            return { lat: sum.lat / ring.length, lon: sum.lon / ring.length };
+            const s = ring.reduce((a, p) => ({ lon: a.lon + p[0], lat: a.lat + p[1] }), { lon: 0, lat: 0 });
+            return { lat: s.lat / ring.length, lon: s.lon / ring.length };
         }
         return null;
     }
 
-    function today() {
-        return new Date().toISOString().split('T')[0];
-    }
+    function today() { return new Date().toISOString().split('T')[0]; }
 
     function fmtDate(str) {
         if (!str) return '';
@@ -272,17 +346,41 @@
         return isNaN(d) ? str : d.toLocaleDateString('fr-FR');
     }
 
+    function distKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function getStatus(fid, feature) {
+        // 1. Vérifier d'abord dans le GeoJSON si le regard est inaccessible
+        if (feature) {
+            const p = feature.properties;
+            const anomReg  = (p.ANOMALIE_REGARD  || '').toLowerCase();
+            const anomTamp = (p.ANOMALIE_TAMPON   || '').toLowerCase();
+            if (anomReg.includes('inacc') || anomTamp.includes('inacc')) return 'inacc';
+        }
+        // 2. Sinon vérifier le CSV des interventions
+        const i = state.interventions.get(fid);
+        if (!i) return 'pending';
+        if (i.isInacc)   return 'inacc';
+        if (i.isTreated) return 'treated';
+        return 'pending';
+    }
+
     function splitCSVLine(line) {
-        const result = [];
-        let cur = '';
-        let inQ = false;
+        const r = []; let cur = ''; let inQ = false;
         for (const ch of line) {
             if (ch === '"') { inQ = !inQ; continue; }
-            if (ch === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+            if (ch === ',' && !inQ) { r.push(cur); cur = ''; continue; }
             cur += ch;
         }
-        result.push(cur);
-        return result;
+        r.push(cur);
+        return r;
     }
 
     function parseCSV(text) {
@@ -303,31 +401,31 @@
         try {
             const resp = await fetch(CONFIG.interventionsCSV + '&t=' + Date.now());
             if (!resp.ok) throw new Error('inaccessible');
-
             const rows = parseCSV(await resp.text());
 
-            console.log('[DEBUG] Headers CSV:', rows.length > 0 ? Object.keys(rows[0]) : 'vide');
-            console.log('[DEBUG] Première ligne:', rows[0]);
+            console.log('[DEBUG] Headers:', rows.length > 0 ? Object.keys(rows[0]) : 'vide');
 
             rows.forEach(row => {
                 const fidRaw = row['fid du regard'] || row['fid_terrain'] || row['fid'] || '';
                 const fid = parseInt(fidRaw, 10);
                 if (isNaN(fid)) return;
 
-                const statusRaw = row['état de l\'intervention']
-                    || row['etat de l\'intervention']
+                const statusRaw = row["état de l'intervention"]
+                    || row["etat de l'intervention"]
                     || row['état intervention']
-                    || row['etat']
-                    || row['statut']
-                    || '';
+                    || row['etat'] || row['statut'] || '';
 
-                const isTreated = statusRaw.toLowerCase().includes('trait');
+                const sl = statusRaw.toLowerCase();
+                const isTreated = sl.includes('trait');
+                const isInacc   = sl.includes('inacc') || sl.includes('inaccessible');
+
                 const ts = new Date(row['horodateur'] || 0).getTime();
                 const existing = state.interventions.get(fid);
 
                 if (!existing || ts >= existing._ts) {
                     state.interventions.set(fid, {
-                        isTreated,
+                        isTreated: isTreated && !isInacc,
+                        isInacc,
                         status: statusRaw,
                         date: row['date intervention'] || '',
                         comment: row['commentaire'] || '',
@@ -342,7 +440,7 @@
             document.getElementById('lastSync').textContent = `Synchro : ${now}`;
 
         } catch(e) {
-            console.warn('[CSV] Erreur:', e.message);
+            console.warn('[CSV]', e.message);
             document.getElementById('syncStatus').innerHTML = `<span style="color:#FCA5A5">⚠ Erreur synchro</span>`;
         }
     }
@@ -356,6 +454,10 @@
         });
     };
 
+    window.navigateTo = function(lat, lon) {
+        window.open(mapsNavLink(lat, lon), '_blank');
+    };
+
     function exportExcel() {
         const rows = state.data.map(f => {
             const p = f.properties;
@@ -367,10 +469,13 @@
                 p[' DESCRIPTION_ANOMALIE'] ? 'Desc: ' + p[' DESCRIPTION_ANOMALIE'] : ''
             ].filter(Boolean).join(' | ');
 
+            const status = getStatus(p.fid_terrain);
+            const statusLabel = status === 'treated' ? 'Traité' : status === 'inacc' ? 'Inaccessible' : 'En attente';
+
             return {
                 fid_terrain: p.fid_terrain,
                 anomalie,
-                statut: interv ? (interv.isTreated ? 'Traité' : 'En attente') : 'En attente',
+                statut: statusLabel,
                 date_intervention: interv ? interv.date : '',
                 commentaire: interv ? interv.comment : '',
                 agent: interv ? interv.agent : '',
@@ -381,10 +486,104 @@
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Regards');
-        ws['!cols'] = [{ wch: 15 }, { wch: 60 }, { wch: 12 }, { wch: 18 }, { wch: 40 }, { wch: 25 }, { wch: 50 }];
+        ws['!cols'] = [{ wch: 15 }, { wch: 60 }, { wch: 14 }, { wch: 18 }, { wch: 40 }, { wch: 25 }, { wch: 50 }];
         XLSX.writeFile(wb, `regards_${today()}.xlsx`);
     }
 
+    // ─── ITINERARY ───────────────────────────────────────────────
+    function buildItinerary(userLat, userLon) {
+        const pending = state.data.filter(f => {
+            const s = getStatus(f.properties.fid_terrain);
+            return s === 'pending' || s === 'inacc';
+        });
+
+        if (pending.length === 0) {
+            document.getElementById('modalContent').innerHTML =
+                `<p style="color:var(--success); padding:1rem 0">🎉 Tous les regards sont traités !</p>`;
+            state.itineraryUrl = null;
+            document.getElementById('btnOpenGmaps').style.display = 'none';
+            return;
+        }
+
+        const withDist = pending.map(f => {
+            const c = getCoords(f.geometry);
+            const dist = c ? distKm(userLat, userLon, c.lat, c.lon) : 9999;
+            return { f, c, dist };
+        }).filter(x => x.c).sort((a, b) => a.dist - b.dist);
+
+        const stops = withDist.slice(0, 9);
+
+        const waypoints = stops.map(x => `${x.c.lat},${x.c.lon}`).join('/');
+        state.itineraryUrl = `https://www.google.com/maps/dir/${userLat},${userLon}/${waypoints}`;
+
+        const stopsHTML = stops.map((x, i) => {
+            const p = x.f.properties;
+            const s = getStatus(p.fid_terrain);
+            const icon = s === 'inacc' ? '🟠' : '🔴';
+            return `
+                <div class="modal-stop">
+                    <span class="stop-num">${i + 1}</span>
+                    <div style="flex:1">
+                        <strong>${icon} Regard #${p.fid_terrain}</strong>
+                        <div style="color:var(--gray-400); font-size:0.7rem">${x.dist.toFixed(1)} km · ${p.ANOMALIE_REGARD || p.ANOMALIE_TAMPON || '—'}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const total = withDist.length;
+        const shown = stops.length;
+
+        document.getElementById('modalContent').innerHTML = `
+            <div style="font-size:0.78rem; color:var(--gray-400); margin-bottom:0.6rem">
+                ${total} regards en attente · Itinéraire optimisé par proximité
+                ${total > 9 ? `<br><span style="color:var(--orange)">⚠ Google Maps limite à 9 arrêts — les ${total - 9} restants ne sont pas inclus</span>` : ''}
+            </div>
+            <div style="font-size:0.75rem; background:#EFF6FF; padding:0.5rem; border-radius:5px; margin-bottom:0.6rem">
+                📍 Départ : votre position actuelle
+            </div>
+            <div class="modal-stops">${stopsHTML}</div>
+        `;
+
+        document.getElementById('btnOpenGmaps').style.display = '';
+    }
+
+    function openItinerary() {
+        const overlay = document.getElementById('modalOverlay');
+        overlay.style.display = 'flex';
+
+        document.getElementById('modalContent').innerHTML =
+            `<div class="gps-loading">📡 Récupération de votre position GPS…</div>`;
+        document.getElementById('btnOpenGmaps').style.display = 'none';
+
+        if (!navigator.geolocation) {
+            document.getElementById('modalContent').innerHTML =
+                `<p style="color:var(--danger); padding:1rem 0">GPS non disponible sur cet appareil.</p>`;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                state.myPosition = { lat, lon };
+
+                if (state.myMarker) state.map.removeLayer(state.myMarker);
+                state.myMarker = L.marker([lat, lon], {
+                    icon: L.divIcon({ className: 'marker-me', iconSize: [14, 14] })
+                }).addTo(state.map).bindPopup('📍 Vous êtes ici');
+
+                buildItinerary(lat, lon);
+            },
+            err => {
+                document.getElementById('modalContent').innerHTML =
+                    `<p style="color:var(--danger); padding:1rem 0">⚠ Impossible de récupérer le GPS.<br><small>${err.message}</small></p>`;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+
+    // ─── MAP ─────────────────────────────────────────────────────
     function initMap() {
         state.map = L.map('map').setView(CONFIG.map.center, CONFIG.map.zoom);
         const osm = L.tileLayer(CONFIG.map.osm, { attribution: '© OpenStreetMap' });
@@ -398,7 +597,9 @@
             div.innerHTML = `
                 <strong>Légende :</strong><br>
                 <div class="legend-row"><span class="marker" style="display:inline-block">123</span>&nbsp;En attente</div>
-                <div class="legend-row" style="margin-top:4px"><span class="marker marker-ok" style="display:inline-block">123</span>&nbsp;Traité ✅</div>
+                <div class="legend-row"><span class="marker marker-ok" style="display:inline-block">123</span>&nbsp;Traité</div>
+                <div class="legend-row"><span class="marker marker-inacc" style="display:inline-block">123</span>&nbsp;Inaccessible</div>
+                <div class="legend-row"><span class="marker-me" style="display:inline-block; border-radius:50%"></span>&nbsp;Ma position</div>
             `;
             return div;
         };
@@ -413,14 +614,13 @@
             const coords = getCoords(f.geometry);
             if (!coords) return;
             const fid = f.properties.fid_terrain;
-            const interv = state.interventions.get(fid);
-            const treated = interv && interv.isTreated;
+            const status = getStatus(fid, f);
 
-            const icon = L.divIcon({
-                className: treated ? 'marker marker-ok' : 'marker',
-                html: String(fid),
-                iconSize: null
-            });
+            const cls = status === 'treated' ? 'marker marker-ok'
+                      : status === 'inacc'   ? 'marker marker-inacc'
+                      : 'marker';
+
+            const icon = L.divIcon({ className: cls, html: String(fid), iconSize: null });
 
             state.markers[fid] = L.marker([coords.lat, coords.lon], { icon })
                 .addTo(state.map)
@@ -433,17 +633,22 @@
         if (pts.length) state.map.fitBounds(pts, { padding: [30, 30] });
     }
 
+    // ─── UI ──────────────────────────────────────────────────────
     function filteredData() {
-        if (state.filter === 'treated') return state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return i && i.isTreated; });
-        if (state.filter === 'pending')  return state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return !i || !i.isTreated; });
+        if (state.filter === 'treated') return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'treated');
+        if (state.filter === 'pending')  return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'pending');
+        if (state.filter === 'inacc')    return state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'inacc');
         return state.data;
     }
 
     function updateStats() {
         document.getElementById('count').textContent = state.data.length;
-        const n = state.data.filter(f => { const i = state.interventions.get(f.properties.fid_terrain); return i && i.isTreated; }).length;
-        document.getElementById('statTreated').textContent = n;
-        document.getElementById('statPending').textContent = state.data.length - n;
+        const t = state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'treated').length;
+        const i = state.data.filter(f => getStatus(f.properties.fid_terrain, f) === 'inacc').length;
+        const p = state.data.length - t - i;
+        document.getElementById('statTreated').textContent = t;
+        document.getElementById('statInacc').textContent = i;
+        document.getElementById('statPending').textContent = p;
     }
 
     function cardHTML(f) {
@@ -451,21 +656,22 @@
         const coords = getCoords(f.geometry);
         const url = coords ? mapsLink(coords.lat, coords.lon) : '#';
         const interv = state.interventions.get(p.fid_terrain);
-        const treated = interv && interv.isTreated;
+        const status = getStatus(p.fid_terrain);
 
-        const badge = treated
-            ? `<span class="badge badge-treated">✅ Traité</span>`
-            : `<span class="badge badge-pending">⏳ En attente</span>`;
+        const badge = status === 'treated' ? `<span class="badge badge-treated">✅ Traité</span>`
+                    : status === 'inacc'   ? `<span class="badge badge-inacc">🟠 Inaccessible</span>`
+                    : `<span class="badge badge-pending">⏳ En attente</span>`;
 
-        const intervLine = treated ? `
-            <div class="card-interv">
-                📅 ${interv.date ? fmtDate(interv.date) : '—'}
-                ${interv.comment ? ' · ' + interv.comment : ''}
-                ${interv.agent   ? ' · 👤 ' + interv.agent : ''}
-            </div>` : '';
+        const cls = status === 'treated' ? 'treated' : status === 'inacc' ? 'inacc' : '';
+
+        const infoLine = interv && interv.isTreated ? `
+            <div class="card-interv">📅 ${interv.date ? fmtDate(interv.date) : '—'}${interv.comment ? ' · ' + interv.comment : ''}${interv.agent ? ' · 👤 ' + interv.agent : ''}</div>` : '';
+
+        const inaccLine = interv && interv.isInacc ? `
+            <div class="card-inacc-info">🚧 ${interv.comment || 'Inaccessible'}${interv.agent ? ' · 👤 ' + interv.agent : ''}</div>` : '';
 
         return `
-            <div class="card ${treated ? 'treated' : ''}" data-fid="${p.fid_terrain}">
+            <div class="card ${cls}" data-fid="${p.fid_terrain}">
                 <div class="card-head">
                     <div class="card-fid">#${p.fid_terrain}</div>
                     ${badge}
@@ -473,10 +679,11 @@
                 ${p.ANOMALIE_REGARD  ? `<div class="card-anomalie">🔴 Regard: ${p.ANOMALIE_REGARD}</div>` : ''}
                 ${p.ANOMALIE_TAMPON  ? `<div class="card-anomalie">🔴 Tampon: ${p.ANOMALIE_TAMPON}</div>` : ''}
                 ${p[' DESCRIPTION_ANOMALIE'] ? `<div class="card-anomalie">📝 ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
-                ${intervLine}
+                ${infoLine}${inaccLine}
                 <div class="card-loc">
-                    📍 <a href="${url}" target="_blank">Google Maps</a>
-                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation(); copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>` : ''}
+                    📍 <a href="${url}" target="_blank">Maps</a>
+                    ${coords ? `<button class="btn btn-nav" onclick="event.stopPropagation(); navigateTo(${coords.lat},${coords.lon})">🧭 Y aller</button>` : ''}
+                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation(); copyLink(${coords.lat},${coords.lon},this)">📋</button>` : ''}
                 </div>
             </div>`;
     }
@@ -486,7 +693,7 @@
         const el = document.getElementById('sidebar');
         el.innerHTML = data.length
             ? data.map(cardHTML).join('')
-            : `<div style="padding:1.5rem; text-align:center; color:var(--gray-400); font-size:0.85rem;">Aucun regard pour ce filtre.</div>`;
+            : `<div style="padding:1.5rem; text-align:center; color:var(--gray-400); font-size:0.82rem;">Aucun regard pour ce filtre.</div>`;
 
         el.querySelectorAll('.card').forEach(card => {
             card.addEventListener('click', e => {
@@ -500,13 +707,17 @@
         const p = f.properties;
         const coords = getCoords(f.geometry);
         const url = mapsLink(coords.lat, coords.lon);
+        const navUrl = mapsNavLink(coords.lat, coords.lon);
         const formUrl = CONFIG.googleForm.url + '&' + CONFIG.googleForm.fidField + '=' + p.fid_terrain;
         const interv = state.interventions.get(p.fid_terrain);
-        const treated = interv && interv.isTreated;
+        const status = getStatus(p.fid_terrain, f);
 
-        const badge = treated
-            ? `<span class="badge badge-treated">✅ Traité</span>`
-            : `<span class="badge badge-pending">⏳ En attente</span>`;
+        const badge = status === 'treated' ? `<span class="badge badge-treated">✅ Traité</span>`
+                    : status === 'inacc'   ? `<span class="badge badge-inacc">🟠 Inaccessible</span>`
+                    : `<span class="badge badge-pending">⏳ En attente</span>`;
+
+        // Si inaccessible vient du GeoJSON directement (pas d'intervention enregistrée)
+        const geoInacc = !interv && status === 'inacc';
 
         return `
             <div class="popup">
@@ -517,18 +728,26 @@
                         ${p.ANOMALIE_TAMPON ? `<div><strong>Anomalie Tampon:</strong> ${p.ANOMALIE_TAMPON}</div>` : ''}
                         ${p[' DESCRIPTION_ANOMALIE'] ? `<div><strong>Description:</strong> ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
                     </div>` : ''}
-                ${treated ? `
+                ${interv && interv.isTreated ? `
                     <div class="popup-treated">
                         ✅ <strong>Intervention effectuée</strong><br>
                         ${interv.date    ? '📅 ' + fmtDate(interv.date) + '<br>' : ''}
                         ${interv.comment ? '💬 ' + interv.comment + '<br>' : ''}
                         ${interv.agent   ? '👤 ' + interv.agent : ''}
                     </div>` : ''}
+                ${interv && interv.isInacc || geoInacc ? `
+                    <div class="popup-inacc">
+                        🚧 <strong>Regard Inaccessible</strong><br>
+                        ${interv && interv.comment ? '💬 ' + interv.comment + '<br>' : ''}
+                        ${interv && interv.agent   ? '👤 ' + interv.agent : ''}
+                        ${geoInacc ? '<small style="opacity:0.7">Source : données QField</small>' : ''}
+                    </div>` : ''}
                 <div class="popup-loc">
-                    <a href="${url}" target="_blank">📍 Ouvrir dans Google Maps</a>
-                    <button class="btn btn-copy-lg" onclick="copyLink(${coords.lat},${coords.lon},this)">📋 Copier le lien pour WhatsApp</button>
+                    <a href="${url}" target="_blank">📍 Voir sur Google Maps</a>
+                    <a href="${navUrl}" target="_blank" class="btn btn-nav-lg">🧭 M'y emmener (navigation GPS)</a>
+                    <button class="btn btn-copy-lg" onclick="copyLink(${coords.lat},${coords.lon},this)" style="margin-top:5px">📋 Copier lien WhatsApp</button>
                 </div>
-                <a href="${formUrl}" target="_blank" class="btn" style="margin-top:0.5rem">📝 Signaler intervention</a>
+                <a href="${formUrl}" target="_blank" class="btn" style="margin-top:0.4rem; display:block">📝 Signaler intervention</a>
             </div>`;
     }
 
@@ -536,11 +755,9 @@
         const f = state.data.find(x => x.properties.fid_terrain === fid);
         if (!f) return;
         const coords = getCoords(f.geometry);
-
         document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
         const card = document.querySelector(`.card[data-fid="${fid}"]`);
         if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-
         state.map.setView([coords.lat, coords.lon], 17);
         state.markers[fid]?.bindPopup(popupHTML(f)).openPopup();
     }
@@ -567,10 +784,22 @@
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 state.filter = btn.dataset.filter;
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('f-all', 'f-pending', 'f-treated'));
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('f-all', 'f-pending', 'f-treated', 'f-inacc'));
                 btn.classList.add('f-' + state.filter);
                 renderList();
             });
+        });
+
+        document.getElementById('btnItinerary').addEventListener('click', openItinerary);
+        document.getElementById('btnCloseModal').addEventListener('click', () => {
+            document.getElementById('modalOverlay').style.display = 'none';
+        });
+        document.getElementById('btnOpenGmaps').addEventListener('click', () => {
+            if (state.itineraryUrl) window.open(state.itineraryUrl, '_blank');
+        });
+        document.getElementById('modalOverlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('modalOverlay'))
+                document.getElementById('modalOverlay').style.display = 'none';
         });
 
         const [ok] = await Promise.all([loadGeoJSON(), loadInterventions()]);
@@ -592,7 +821,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
-
 })();
 </script>
 </body>
