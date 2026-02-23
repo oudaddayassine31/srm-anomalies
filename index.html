@@ -21,7 +21,7 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: var(--sans); }
 
-        .header { background: linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
+        .header { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
         .header h1 { font-size:1.1rem; }
         .header small { opacity:.85; font-size:.75rem; }
         .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -47,9 +47,6 @@
         .btn-copy-lg { background:var(--warning); padding:6px 12px; border-radius:5px; font-size:.8rem; width:100%; }
         .btn-copy-lg:hover { background:var(--warning-dark); }
 
-
-
-
         .filter-bar { background:#fff; border-bottom:1px solid var(--gray-200); padding:.5rem; display:flex; gap:6px; }
         .filter-btn { flex:1; padding:5px 8px; border-radius:6px; border:2px solid var(--gray-200); background:#fff; font-family:var(--sans); font-weight:600; font-size:.72rem; cursor:pointer; transition:all .15s; text-align:center; }
         .filter-btn:hover { transform:translateY(-1px); box-shadow:0 2px 6px rgba(0,0,0,.1); }
@@ -58,7 +55,7 @@
         .f-treated { background:var(--success-light); border-color:var(--success); color:var(--success-dark); }
         .f-inacc   { background:var(--inacc-light); border-color:var(--inacc); color:var(--inacc-dark); }
 
-        .layout { display:flex; height:calc(100vh - 135px); }
+        .layout { display:flex; height:calc(100vh - 120px); }
         .sidebar { width:320px; background:var(--gray-50); border-right:1px solid var(--gray-200); display:flex; flex-direction:column; }
         .sidebar-list { overflow-y:auto; flex:1; padding:.5rem; }
 
@@ -87,7 +84,6 @@
         .marker { background:var(--danger-light); border:2px solid var(--danger); border-radius:4px; padding:1px 5px; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--danger-dark); box-shadow:0 1px 3px rgba(0,0,0,.3); white-space:nowrap; }
         .marker-ok    { background:#D1FAE5; border-color:var(--success); color:var(--success-dark); opacity:.75; }
         .marker-inacc { background:var(--inacc-light); border-color:var(--inacc); color:var(--inacc-dark); }
-
 
         .legend { background:#fff; padding:8px 12px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,.2); font-size:.7rem; line-height:1.9; }
         .legend-row { display:flex; align-items:center; gap:6px; }
@@ -142,8 +138,6 @@
     <div class="stat-item"><span class="dot dot-blue"></span><span class="stat-num" id="statInacc">-</span>&nbsp;Inaccessibles</div>
     <div style="margin-left:auto; font-size:.7rem; opacity:.7" id="lastSync"></div>
 </div>
-
-
 
 <div class="layout">
     <aside class="sidebar">
@@ -216,17 +210,7 @@
         return i.isTreated ? 'treated' : 'pending';
     }
 
-
     // ── ROUTING ──────────────────────────────────────────────────
-
-    function clearRoute() {
-        if (state.routeLayer) { state.map.removeLayer(state.routeLayer); state.routeLayer = null; }
-        if (state.destMarker) { state.map.removeLayer(state.destMarker); state.destMarker = null; }
-        $('routeInfo').classList.remove('on');
-        $('btnClear').style.display = 'none';
-        setStatus('Capturez votre position puis entrez un FID', '');
-    }
-
     async function drawRoute(fromLat, fromLon, toLat, toLon) {
         const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
         const resp = await fetch(url);
@@ -234,14 +218,12 @@
         const data = await resp.json();
         if (!data.routes?.length) throw new Error('Aucun itinéraire trouvé');
 
-        const route = data.routes[0];
-        const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
 
-        if (state.routeLayer) state.map.removeLayer(state.routeLayer);
-        if (state.destMarker) state.map.removeLayer(state.destMarker);
+        if (state.routeLayer) { state.map.removeLayer(state.routeLayer); state.routeLayer = null; }
+        if (state.destMarker) { state.map.removeLayer(state.destMarker); state.destMarker = null; }
 
-        state.routeLayer = L.polyline(coords, { color: '#7C3AED', weight: 5, opacity: 0.85, lineJoin: 'round' }).addTo(state.map);
-
+        state.routeLayer = L.polyline(coords, { color:'#7C3AED', weight:5, opacity:0.85, lineJoin:'round' }).addTo(state.map);
         state.destMarker = L.marker([toLat, toLon], {
             icon: L.divIcon({
                 className: '',
@@ -250,64 +232,20 @@
             })
         }).addTo(state.map);
 
-        state.map.fitBounds(state.routeLayer.getBounds(), { padding: [50, 50] });
-
-        const distKm = (route.distance / 1000).toFixed(1);
-        const mins = Math.round(route.duration / 60);
-        const hrs = Math.floor(mins / 60);
-        const rem = mins % 60;
-        $('routeDist').textContent = distKm + ' km';
-        $('routeTime').textContent = hrs > 0 ? `${hrs}h${rem.toString().padStart(2,'0')}` : `${mins} min`;
-        $('routeInfo').classList.add('on');
-        $('btnClear').style.display = 'block';
+        state.map.fitBounds(state.routeLayer.getBounds(), { padding:[50,50] });
     }
 
-    async function navigateToFid() {
-        const input = $('navFid');
-        const fid = parseInt(input.value, 10);
-
-        if (isNaN(fid)) {
-            input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 600);
-            setStatus('⚠ Entrez un numéro FID valide', 'error'); return;
-        }
-        if (!state.myPosition) {
-            setStatus('⚠ Capturez d\'abord votre position GPS', 'error'); return;
-        }
-
-        const feature = state.data.find(f => f.properties.fid_terrain === fid);
-        if (!feature) {
-            input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 600);
-            setStatus(`❌ FID ${fid} introuvable`, 'error'); return;
-        }
-
-        const coords = getCoords(feature.geometry);
-        if (!coords) { setStatus('❌ Coordonnées manquantes', 'error'); return; }
-
-        setStatus('⏳ Calcul de l\'itinéraire via OSRM…', 'loading');
-        $('btnNavigate').disabled = true;
-
-        try {
-            await drawRoute(state.myPosition.lat, state.myPosition.lon, coords.lat, coords.lon);
-            setStatus(`✅ Itinéraire vers Regard #${fid} affiché`, 'ok');
-            selectRecord(fid);
-        } catch(e) {
-            setStatus('❌ ' + e.message, 'error');
-        } finally {
-            $('btnNavigate').disabled = false;
-        }
-    }
-
-    // Depuis le popup
-    window.routeToRegard = async function(lat, lon, fid) {
-        if (!state.myPosition) {
-            alert('Capturez d\'abord votre position via le bouton "Ma position"'); return;
-        }
-        $('navFid').value = fid;
-        setStatus('⏳ Calcul de l\'itinéraire…', 'loading');
-        try {
-            await drawRoute(state.myPosition.lat, state.myPosition.lon, lat, lon);
-            setStatus(`✅ Itinéraire vers #${fid} affiché`, 'ok');
-        } catch(e) { setStatus('❌ ' + e.message, 'error'); }
+    // Appelé depuis le popup
+    window.routeToRegard = function(toLat, toLon) {
+        if (!navigator.geolocation) { alert('GPS non disponible sur cet appareil'); return; }
+        navigator.geolocation.getCurrentPosition(
+            async pos => {
+                try { await drawRoute(pos.coords.latitude, pos.coords.longitude, toLat, toLon); }
+                catch(e) { alert('Erreur itinéraire : ' + e.message); }
+            },
+            () => { alert('GPS refusé — autorisez la localisation dans votre navigateur'); },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
     };
 
     // ── CSV ──────────────────────────────────────────────────────
@@ -340,9 +278,6 @@
             const resp = await fetch(CONFIG.interventionsCSV + '&t=' + Date.now());
             if (!resp.ok) throw new Error('inaccessible');
             const rows = parseCSV(await resp.text());
-
-            console.log('[DEBUG] Headers:', rows[0] ? Object.keys(rows[0]) : 'vide');
-
             rows.forEach(row => {
                 const fid = parseInt(row['fid du regard'] || row['fid_terrain'] || row['fid'] || '', 10);
                 if (isNaN(fid)) return;
@@ -360,7 +295,6 @@
                     });
                 }
             });
-
             const now = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
             $('syncStatus').innerHTML = `<span class="pulse"></span> Synchro ${now}`;
             $('lastSync').textContent = `Synchro : ${now}`;
@@ -419,7 +353,6 @@
                 <div class="legend-row"><span class="marker" style="display:inline-block">123</span>&nbsp;En attente</div>
                 <div class="legend-row" style="margin-top:4px"><span class="marker marker-ok" style="display:inline-block">123</span>&nbsp;Traité ✅</div>
                 <div class="legend-row" style="margin-top:4px"><span class="marker marker-inacc" style="display:inline-block">123</span>&nbsp;Inaccessible 🔵</div>
-                <div class="legend-row" style="margin-top:4px"><span class="my-position" style="display:inline-block;border-radius:50%"></span>&nbsp;Ma position</div>
                 <div class="legend-row" style="margin-top:4px"><span style="display:inline-block;width:30px;height:4px;background:#7C3AED;border-radius:2px"></span>&nbsp;Itinéraire</div>
             `;
             return div;
@@ -436,7 +369,7 @@
             const fid = f.properties.fid_terrain;
             const status = getStatus(fid, f);
             const cls = status === 'treated' ? 'marker marker-ok' : status === 'inacc' ? 'marker marker-inacc' : 'marker';
-            state.markers[fid] = L.marker([coords.lat, coords.lon], { icon: L.divIcon({ className: cls, html: String(fid), iconSize: null }) })
+            state.markers[fid] = L.marker([coords.lat, coords.lon], { icon: L.divIcon({ className:cls, html:String(fid), iconSize:null }) })
                 .addTo(state.map).on('click', () => selectRecord(fid));
         });
     }
@@ -525,7 +458,7 @@
                     </div>` : ''}
                 <div class="popup-loc">
                     <a href="${url}" target="_blank">📍 Voir sur Google Maps</a>
-                    <button class="btn-route-popup" onclick="routeToRegard(${coords.lat},${coords.lon},${p.fid_terrain})">
+                    <button class="btn-route-popup" onclick="routeToRegard(${coords.lat},${coords.lon})">
                         🗺️ Google Maps Itinéraire
                     </button>
                     <button class="btn btn-copy-lg" onclick="copyLink(${coords.lat},${coords.lon},this)">📋 Copier lien WhatsApp</button>
@@ -572,8 +505,6 @@
                 renderList();
             });
         });
-
-        $('btnGps').addEventListener('click', locateMe);
 
         const [ok] = await Promise.all([loadGeoJSON(), loadInterventions()]);
         if (!ok) return;
