@@ -160,7 +160,7 @@
 
     const CONFIG = {
         dataFile: 'regard.geojson',
-        communeFile: 'commune.geojson', 
+        communeFile: 'communes.geojson', 
         interventionsCSV: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVeCELfyOe4Fb8J7ZGlVUS1rSQhhoOopnuaz3FPv6yKJeazRe-VOGYwLa_VP4fT5qMFo_btWiVjSf0/pub?gid=2060519266&single=true&output=csv',
         googleForm: {
             url: 'https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=pp_url',
@@ -482,7 +482,7 @@
     async function loadCommunes() {
     try {
         const resp = await fetch(CONFIG.communeFile);
-        if (!resp.ok) throw new Error('commune.geojson not found');
+        if (!resp.ok) throw new Error('communes.geojson not found');
 
         const geojson = await resp.json();
 
