@@ -160,6 +160,7 @@
 
     const CONFIG = {
         dataFile: 'regard.geojson',
+        communeFile: 'commune.geojson', 
         interventionsCSV: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQVeCELfyOe4Fb8J7ZGlVUS1rSQhhoOopnuaz3FPv6yKJeazRe-VOGYwLa_VP4fT5qMFo_btWiVjSf0/pub?gid=2060519266&single=true&output=csv',
         googleForm: {
             url: 'https://docs.google.com/forms/d/e/1FAIpQLSfRW8faRCUf9njXGX0bnhtTH_oAXifpRzHCVQiR1tQ_XF7Icg/viewform?usp=pp_url',
@@ -174,6 +175,7 @@
 
     const state = {
         map: null, markers: {}, data: [],
+        communeLayer: null,
         interventions: new Map(),
         filter: 'all',
         routeLayer: null, destMarker: null
@@ -477,6 +479,36 @@
         state.map.setView([coords.lat, coords.lon], 17);
         state.markers[fid]?.bindPopup(popupHTML(f)).openPopup();
     }
+    async function loadCommunes() {
+    try {
+        const resp = await fetch(CONFIG.communeFile);
+        if (!resp.ok) throw new Error('commune.geojson not found');
+
+        const geojson = await resp.json();
+
+        state.communeLayer = L.geoJSON(geojson, {
+            style: {
+                color: '#2563EB',     // border color
+                weight: 1,
+                fillColor: '#93C5FD', // light blue fill
+                fillOpacity: 0.2
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties.NOM_COMMUNE) {
+                    layer.bindTooltip(feature.properties.NOM_COMMUNE, {
+                        permanent: false,
+                        direction: "center",
+                        className: "commune-label"
+                    });
+                }
+            }
+        }).addTo(state.map);
+        state.communeLayer.bringToBack();
+
+    } catch (e) {
+        console.warn('[COMMUNES]', e.message);
+    }
+}
 
     async function loadGeoJSON() {
         try {
@@ -506,7 +538,11 @@
             });
         });
 
-        const [ok] = await Promise.all([loadGeoJSON(), loadInterventions()]);
+        const [ok] = await Promise.all([
+    loadGeoJSON(),
+    loadInterventions(),
+    loadCommunes()   // 👈 ADD THIS
+]);
         if (!ok) return;
 
         updateStats();
