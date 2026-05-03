@@ -261,10 +261,14 @@
         r.push(cur); return r;
     }
 
+    function normKey(s) {
+        return s.trim().toLowerCase().replace(/[‘’ʼ`´]/g, "'");
+    }
+
     function parseCSV(text) {
         const lines = text.split('\n').filter(l => l.trim());
         if (lines.length < 2) return [];
-        const headers = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+        const headers = splitCSVLine(lines[0]).map(normKey);
         const rows = [];
         for (let i = 1; i < lines.length; i++) {
             const cols = splitCSVLine(lines[i]);
@@ -280,22 +284,19 @@
             const resp = await fetch(CONFIG.interventionsCSV + '&t=' + Date.now());
             if (!resp.ok) throw new Error('inaccessible');
             const rows = parseCSV(await resp.text());
-            rows.forEach(row => {
+            state.interventions.clear();
+            rows.forEach((row, idx) => {
                 const fid = parseInt(row['fid du regard'] || row['fid_terrain'] || row['fid'] || '', 10);
                 if (isNaN(fid)) return;
-                const statusRaw = row['état de l\'intervention'] || row['etat de l\'intervention'] || row['état intervention'] || row['etat'] || row['statut'] || '';
+                const statusRaw = row["état de l'intervention"] || row["etat de l'intervention"] || row['état intervention'] || row['etat'] || row['statut'] || '';
                 const isTreated = statusRaw.toLowerCase().includes('trait');
-                const ts = new Date(row['horodateur'] || 0).getTime();
-                const ex = state.interventions.get(fid);
-                if (!ex || ts >= ex._ts) {
-                    state.interventions.set(fid, {
-                        isTreated, status: statusRaw,
-                        date: row['date intervention'] || '',
-                        comment: row['commentaire'] || '',
-                        agent: row['nom et prénom'] || row['nom'] || '',
-                        _ts: ts
-                    });
-                }
+                state.interventions.set(fid, {
+                    isTreated, status: statusRaw,
+                    date: row['date intervention'] || '',
+                    comment: row['commentaire'] || '',
+                    agent: row['nom et prénom'] || row['nom'] || '',
+                    _idx: idx
+                });
             });
             const now = new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
             $('syncStatus').innerHTML = `<span class="pulse"></span> Synchro ${now}`;
