@@ -186,13 +186,62 @@
     function mapsLink(lat, lon) { return `https://www.google.com/maps?q=${lat},${lon}`; }
 
     function getCoords(geometry) {
-        if (!geometry) return null;
-        if (geometry.type === 'Point') return { lat: geometry.coordinates[1], lon: geometry.coordinates[0] };
-        if (geometry.type === 'Polygon') {
-            const ring = geometry.coordinates[0];
-            const s = ring.reduce((a,p) => ({ lon: a.lon+p[0], lat: a.lat+p[1] }), { lon:0, lat:0 });
-            return { lat: s.lat/ring.length, lon: s.lon/ring.length };
+        if (!geometry || !geometry.type || !geometry.coordinates) return null;
+
+        if (geometry.type === 'Point') {
+            if (!Array.isArray(geometry.coordinates) || geometry.coordinates.length < 2) return null;
+
+            const lon = Number(geometry.coordinates[0]);
+            const lat = Number(geometry.coordinates[1]);
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+            return { lat, lon };
         }
+
+        if (geometry.type === 'Polygon') {
+            if (!Array.isArray(geometry.coordinates) || geometry.coordinates.length === 0) return null;
+
+            const ring = geometry.coordinates[0];
+
+            if (!Array.isArray(ring) || ring.length === 0) return null;
+
+            const validPoints = ring
+                .filter(p => Array.isArray(p) && p.length >= 2)
+                .map(p => ({
+                    lon: Number(p[0]),
+                    lat: Number(p[1])
+                }))
+                .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon));
+
+            if (validPoints.length === 0) return null;
+
+            const s = validPoints.reduce(
+                (a, p) => ({
+                    lon: a.lon + p.lon,
+                    lat: a.lat + p.lat
+                }),
+                { lon: 0, lat: 0 }
+            );
+
+            return {
+                lat: s.lat / validPoints.length,
+                lon: s.lon / validPoints.length
+            };
+        }
+
+        if (geometry.type === 'MultiPolygon') {
+            if (!Array.isArray(geometry.coordinates) || geometry.coordinates.length === 0) return null;
+
+            const firstPolygon = geometry.coordinates[0];
+            if (!Array.isArray(firstPolygon) || firstPolygon.length === 0) return null;
+
+            return getCoords({
+                type: 'Polygon',
+                coordinates: firstPolygon
+            });
+        }
+
         return null;
     }
 
@@ -416,8 +465,12 @@
                 ${p[' DESCRIPTION_ANOMALIE'] ? `<div class="card-anomalie">📝 ${p[' DESCRIPTION_ANOMALIE']}</div>` : ''}
                 ${intervLine}
                 <div class="card-loc">
-                    📍 <a href="${url}" target="_blank">Google Maps</a>
-                    ${coords ? `<button class="btn btn-copy" onclick="event.stopPropagation();copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>` : ''}
+                    ${
+                        coords
+                        ? `📍 <a href="${url}" target="_blank">Google Maps</a>
+                           <button class="btn btn-copy" onclick="event.stopPropagation();copyLink(${coords.lat},${coords.lon},this)">📋 Copier</button>`
+                        : `⚠️ Coordonnées manquantes`
+                    }
                 </div>
             </div>`;
     }
@@ -473,12 +526,27 @@
     function selectRecord(fid) {
         const f = state.data.find(x => x.properties.fid_terrain === fid);
         if (!f) return;
+
         const coords = getCoords(f.geometry);
+
         document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+
         const card = document.querySelector(`.card[data-fid="${fid}"]`);
-        if (card) { card.classList.add('selected'); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+        if (card) {
+            card.classList.add('selected');
+            card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+        }
+
+        if (!coords) {
+            alert(`Le regard #${fid} n'a pas de coordonnées valides.`);
+            return;
+        }
+
         state.map.setView([coords.lat, coords.lon], 17);
-        state.markers[fid]?.bindPopup(popupHTML(f)).openPopup();
+
+        if (state.markers[fid]) {
+            state.markers[fid].bindPopup(popupHTML(f)).openPopup();
+        }
     }
     async function loadCommunes() {
     try {
